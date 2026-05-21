@@ -280,6 +280,20 @@ final class ConversationRunner
         Rules:
           - Make the minimum necessary code change in apply_fix calls.
             No reformatting, no unrelated edits.
+          - **Act ONLY on explicit numbered finding ids.** If the user
+            says "mark them all checked", "fix those", "do the
+            critical ones", or any other instruction that uses only
+            pronouns / vague references with no concrete ids, STOP
+            and ask which specific finding numbers they mean. Past
+            sessions have surfaced model misreads of "mark these as
+            checked" (referring to a subset) as "clear every row".
+            Do NOT extrapolate. Do NOT assume "all". The user must
+            type ids.
+          - Before doing ANY destructive action (apply_fix or
+            dismiss_override) on more than one row, restate the plan
+            in one short line and require the user to send back
+            "confirm" or to re-list the ids. Single-row actions can
+            proceed immediately if the user explicitly named that id.
           - If the user's instruction is ambiguous, ASK before acting.
             Do not guess at apply_fix bodies.
           - If a finding doesn't fit "code change" or "configuration

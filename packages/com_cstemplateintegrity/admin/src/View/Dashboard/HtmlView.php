@@ -404,10 +404,37 @@ final class HtmlView extends BaseHtmlView
            includes). Wrap this section in `<details><summary>…</summary>`
            so it collapses when the report is rendered.
 
+        f. **Suggested next-turn prompts** — three copy-paste-able prompts
+           the user can pick from to drive the next chat turn. ALWAYS
+           include this section, even when there are no ALERTs. Format:
+
+           > **Fix the security ones, mark the rest as checked:**
+           > > Fix #1, #3. Mark #2, #4, #5 as checked.
+           >
+           > **Walk me through each ALERT before applying:**
+           > > Walk me through #1 with the proposed patch, then wait for
+           > > my approval before applying. Repeat for #3.
+           >
+           > **Just the most critical:**
+           > > Fix only #1 (the anonymous-trigger ALERT). Leave the rest
+           > > for now.
+
+           Substitute the real finding ids in each prompt — never leave
+           placeholders. Tailor the third prompt to the highest-severity
+           finding in the report. If there are no ALERTs, replace the
+           three prompts with the single line:
+           > > Mark them all as checked — review confirms no security
+           > > regressions.
+
+           Why this format: it gives the user an unambiguous, precise
+           command to copy back into the chat. Saying "mark these as
+           checked" without ids has caused the chat agent to misread the
+           pronoun and act on the wrong rows.
+
            Tone throughout: contractions are fine. No "We have completed a
            comprehensive review of…" boilerplate. Patient, explanatory,
-           ball-in-their-court close ("Let me know about the first one and
-           I'll fix it").
+           ball-in-their-court close ("Let me know which prompt you'd
+           like to use, or send your own.").
 
         ### 5. Post the report
         `POST {$this->apiBase}/sessions` with `name` (`YYYY-MM-DD-HHMMSS`),
@@ -419,14 +446,16 @@ final class HtmlView extends BaseHtmlView
         ### 6. Confirm, then fix
         End your reply with:
 
-        > "Tell me which findings you'd like me to fix and which to leave
-        > alone. For each one I confirm, I'll back the file up first so we
-        > can roll back if anything breaks."
+        > "Pick one of the prompts above, or send your own naming
+        > specific finding ids. I'll back every file up before any
+        > change so anything is reversible."
 
-        Then **WAIT.** Do not write anything until the user names specific
-        findings. Confirmation is **per finding** — even "fix everything"
-        gets a one-line recap of exactly what that covers before you
-        proceed.
+        Then **WAIT.** Do not write anything until the user replies.
+        Confirmation is **per finding id** — if the user's reply uses
+        only pronouns ("mark them all checked", "fix those") without
+        ids, STOP and ask them which numbered findings they mean.
+        Never act on an ambiguous pronoun even if you think you know
+        what they meant.
 
         For each confirmed finding:
           a. **Classify the action.** Code change (missing escape, removed

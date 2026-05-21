@@ -19,6 +19,16 @@
     <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
+        <version>2.3.4</version>
+        <security>
+            <item>Scan prompt now produces a "Suggested next-turn prompts" section at the end of every report, with three copy-paste-able prompts that name finding ids explicitly (Fix #1, #3. Mark #2, #4, #5 as checked.) instead of using pronouns. Removes the ambiguity that has caused the chat agent to act on the wrong rows.</item>
+            <item>Chat system prompt now refuses ambiguous-pronoun instructions. The agent must STOP and ask which specific finding numbers are meant whenever the user says "them all", "those", "the critical ones" etc. without concrete ids. Multi-row destructive actions also require an explicit "confirm" reply.</item>
+        </security>
+    </changelog>
+
+    <changelog>
+        <element>pkg_cstemplateintegrity</element>
+        <type>package</type>
         <version>2.3.3</version>
         <addition>
             <item>Per-template rescan picker on the dashboard — modal with one checkbox per template that actually has overrides on disk.</item>

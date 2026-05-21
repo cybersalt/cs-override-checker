@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.4] — 2026-05-21
+
+Prompt-only patch release: closes the "act on ambiguous pronouns" footgun that has bitten test sessions since chat-with-Claude landed.
+
+### 🔒 Security
+
+- **Scan prompt now produces "Suggested next-turn prompts".** Every Claude-generated scan report ends with three copy-paste-able prompts the user can send back to drive the next chat turn. Each prompt names finding ids explicitly (e.g. `Fix #1, #3. Mark #2, #4, #5 as checked.`) instead of pronouns like "mark these" or "fix the critical ones". Reason: in real test sessions the chat agent has misread "mark these as checked" (referring to a small subset) as "clear every row in the tracker" — wiping 70 rows on one occasion. With explicit numbered ids the user retains precision and the model has no ambiguous pronoun to resolve.
+- **Chat system prompt now refuses ambiguous-pronoun instructions.** The chat agent must STOP and ask which specific finding numbers the user means whenever the instruction uses pronouns or vague references ("them all", "those", "the critical ones") without concrete ids. It must also restate the plan and wait for explicit `confirm` before any destructive action that touches more than one row. Single-row actions with an explicit id can still proceed immediately. These guardrails are belt-and-braces alongside the v2.3.3 removal of the `dismiss_all` chat tool.
+
+### Migration
+
+In-place upgrade from 2.3.3. No schema changes; no settings changes. Existing sessions continue to use whatever prompt was in effect when their scan ran — re-run the scan to get a new report with the Suggested next-turn prompts section.
+
 ## [2.3.3] — 2026-05-21
 
 Iteration release: chat-with-Claude stability, dashboard polish, and two new list views (Action log + File backups) with sortable headers and a Joomla-native filter bar.
