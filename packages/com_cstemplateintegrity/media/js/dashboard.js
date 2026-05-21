@@ -29,6 +29,7 @@
         wireSyntaxHighlight();
         wireRunScanForm();
         wireDiagnosticsButton();
+        wireRescanModal();
         wireChatForm();
     });
 
@@ -168,6 +169,67 @@
         if (!overlay) return;
         overlay.classList.remove('is-active');
         document.body.style.overflow = '';
+    }
+
+    /**
+     * Reset overrides for review picker — modal opened by the
+     * [data-csti-open-rescan] button. Lets the user pick which
+     * template(s) to rescan rather than always rebuilding the tracker
+     * for every enabled template. Submit is disabled until at least
+     * one template is ticked.
+     */
+    function wireRescanModal() {
+        var openBtn = document.querySelector('[data-csti-open-rescan]');
+        var overlay = document.getElementById('csti-rescan-overlay');
+        if (!openBtn || !overlay) return;
+
+        openBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            overlay.classList.add('is-active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Click-outside-to-dismiss + explicit close buttons.
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeRescan();
+        });
+        var closeBtns = overlay.querySelectorAll('[data-csti-rescan-close]');
+        closeBtns.forEach(function (b) { b.addEventListener('click', closeRescan); });
+
+        var selectAll  = overlay.querySelector('[data-csti-rescan-selectall]');
+        var picks      = overlay.querySelectorAll('[data-csti-rescan-pick]');
+        var submitBtn  = overlay.querySelector('[data-csti-rescan-submit]');
+
+        function refreshSubmit() {
+            if (!submitBtn) return;
+            var any = false;
+            picks.forEach(function (cb) { if (cb.checked) any = true; });
+            submitBtn.disabled = !any;
+        }
+        function refreshSelectAll() {
+            if (!selectAll) return;
+            var all = picks.length > 0;
+            picks.forEach(function (cb) { if (!cb.checked) all = false; });
+            selectAll.checked = all;
+        }
+        if (selectAll) {
+            selectAll.addEventListener('change', function () {
+                picks.forEach(function (cb) { cb.checked = selectAll.checked; });
+                refreshSubmit();
+            });
+        }
+        picks.forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                refreshSelectAll();
+                refreshSubmit();
+            });
+        });
+        refreshSubmit();
+
+        function closeRescan() {
+            overlay.classList.remove('is-active');
+            document.body.style.overflow = '';
+        }
     }
 
     /**

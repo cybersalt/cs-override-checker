@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.3] — 2026-05-21
+
+Iteration release: chat-with-Claude stability, dashboard polish, and two new list views (Action log + File backups) with sortable headers and a Joomla-native filter bar.
+
+### 🚀 New
+
+- **Per-template rescan picker.** The dashboard's "Reset overrides for review" button now opens a modal with one checkbox per template that actually has an `html/` override directory on disk. Tick which templates to rescan, optionally Select all, submit only when at least one is chosen. The controller validates posted ids against the on-disk whitelist server-side so a hostile post can't reach templates the picker didn't surface.
+- **File backups list — Restore button per row.** A new green Restore icon button on each backup row submits to the existing `backups.restore` task (auto-backs-up the live file first, then writes the saved bytes). JS `confirm()` shows the destination path before submitting. Detail-page restore modal still exists; the new per-row button is the express path from the list view.
+- **Filter bar on Action log + File backups list.** Joomla-native `js-stools` markup with Choices.js-wrapped dropdowns:
+  - **Action log:** Search (action + details), Action-type dropdown (auto-populated from distinct values), Session dropdown (auto-populated with `#N — name` labels and an optional `(no session)` filter for orphan rows).
+  - **File backups:** Search (file path), Session dropdown.
+  - Both: Limit dropdown (20/50/100/200/500), Filter Options collapse, Clear button.
+- **Sortable column headers** on both list views. Action log sorts by Time / Action / Session; File backups sorts by Saved / File / Size / Session. Direction indicator on the active column, ascending on first click, flips on subsequent clicks. URL state preserves filter+sort+limit across navigation and back/forward.
+- **Date + time** on both list views. `Saved` and `Time` columns now stack `YYYY-MM-DD` on top of `HH:MM:SS` in muted text — easier to sort visually within the same minute.
+- **API tier note on the Method 2 card.** Explains that Anthropic's default Tier 1 (10,000 input tokens/min) is fine for one-shot scans but rate-limits during multi-turn chat fixes; Tier 2 (50,000 tokens/min, billed) is comfortable. Direct link to `console.anthropic.com/settings/limits`.
+- **Dashboard "Open Options" button** appears below the no-API-key warning. Goes to the component's Options form with a base64-encoded `return=` param pointing back at the dashboard, so once the user saves a key they land back here automatically — no manual refresh, no hunting for the dashboard in the menu.
+
+### 🔒 Security
+
+- **API key field now uses native browser password masking.** The `<input>` element renders with `type="password"` so bytes are masked the instant they're typed or pasted. Previous v2.0–v2.3.2 used a CSS `filter: blur()` overlay that showed values briefly during paste and removed the blur on focus. The Reveal toggle now swaps the input type rather than toggling a CSS class. Underlying FormField PHP class is still `TextField` (extending `PasswordField` reproduced a save-truncation bug observed in v2.0.0), so values round-trip through Joomla's save path untouched — only the rendered HTML changes. Applies to both the Anthropic API key and Joomla API token fields.
+- **`dismiss_all` tool removed from the chat agent.** A test session reproduced an unsafe model interpretation: when told to "mark these 10 as checked", Claude invoked `dismiss_all` and cleared all 70 tracker rows instead of the 10 it had just enumerated. The tool description's "ONLY do this if the user explicitly tells you to" guard was not reliably honored. The chat agent now only exposes per-row `dismiss_override`; bulk-clear lives in the dashboard's per-template rescan picker where each template has its own explicit checkbox. The underlying `MarkReviewedHelper::clearAllOverrides()` helper and the REST API's `dismiss-all` endpoint are unchanged.
+- **Absolute server path removed from override-file / core-file API responses.** The `data.attributes.absolute` field (e.g. `/home/<user>/public_html/...`) was redundant with the already-relativized `path` field and leaked the hosting account's filesystem layout to anyone holding a valid Joomla API token. Field removed; clients should use `path`.
+
+### 🐛 Fixes
+
+- **Sortable column headers actually sort now.** First implementation passed the sort URL through `Route::_()` without the `xhtml=false` argument, so it returned `&amp;`-encoded URLs. `htmlspecialchars` then double-encoded `&amp;` to `&amp;amp;`, the browser decoded that once to `&amp;` and PHP parsed query keys as `amp;view`, `amp;sort`, etc. — with no real `view=` present, Joomla defaulted to the dashboard. Fixed in both Actions and Backups sort-link helpers (and on the Clear button).
+- **Chat-with-Claude no longer 400s on "tool_use ids without tool_result blocks immediately after".** The chat loop's `MAX_TURNS` cap (was 12, now 24) could exit the conversation in an `[..., assistant tool_use, user tool_result]` state when Claude needed more rounds than the budget allowed. Appending a new user text turn on top created two consecutive user messages, breaking Anthropic's strict alternation requirement. New `repairToolUseChain()` runs both before adding a new user message and before persisting, and does three things in one pass: (1) synthesises "tool execution was interrupted" tool_result blocks for any orphan tool_use ids so Claude sees an explicit error rather than silent missing data; (2) reorders tool_result blocks to the front of mixed user content (Anthropic requires `tool_result` before any `text` in the same user turn); (3) merges consecutive same-role messages so the array always alternates strictly. Self-healing — sessions that got stuck on the old shape repair themselves on the next chat turn.
+- **Restore-from-list no longer lands on the backup detail page.** Previous flow always redirected to `view=backup&id=...` after restore, where the page is still titled "Backup #N" and still shows the existing "Restore now" modal — looked unfinished. The new per-row restore button sends `return=` empty (falls through to the list); the detail-page restore modal sends `return=backup` to keep its current behavior.
+- **Empty Anthropic API key field no longer rejected on save.** Component config XML now allows an empty string so users can clear a saved key from the Options form without form-validation errors.
+
+### 🔧 Improvements
+
+- **Chat-with-Claude rate-limit posture for the 10K TPM tier.**
+  - **Older tool payloads compressed at API-send time.** `apply_fix` input bodies and `get_override_file` / `get_core_file` result contents over 1KB get stripped from old turns and replaced with `(N bytes — compressed from history)` markers plus a `history_compressed: true` flag. The most recent 4 messages stay untouched so the current turn has full fidelity. The database keeps the un-compressed audit trail — only the wire payload changes.
+  - **Per-turn tool-result byte cap.** When Claude fan-out-calls many tools in one round (we saw 70+ `get_*` calls in one response on a real site), the loop now executes tools in order and stops calling once cumulative `tool_result` payload exceeds 12 KB. Skipped tools return `{"rate_limit_skipped": true, ...}` stubs so Claude sees explicit markers and re-issues them in the next turn.
+  - **System prompt steers Claude toward small batches.** Explicit guidance to fetch at most 2 file pairs per turn on the low tier, plus terse reply directives (bullets not paragraphs, no preambles, one-line per-fix summaries).
+- **Dashboard "Run automated scan now" button is now green** (`btn-success`) instead of blue (`btn-primary`). Blue stays for copy-the-prompt buttons; green is the action that actually runs something on your site.
+- **API key field on paste:** browser-native password masking means no momentary visible flicker between paste and mask. The old CSS-blur behavior had a brief visible window before the focus-removed-blur kicked in.
+- **`v2` review prompt rewrite** on the dashboard. Tightens the scan-with-Claude prompt with field-tested corrections: severity now judged relative to core (was absolute, falsely flagged every legacy override that mirrors core's intentionally-raw output), normalize-before-diff rule, alternative-layout handling (no core counterpart), mandatory code-execution indicator scan with a fixed pattern list, JSON:API response shape docs so Claude doesn't have to probe, dismiss-all guardrails (refuse while ALERT unresolved; restate count), STOP-on-write-failure rule, privilege precondition required on every ALERT, framework-generated overrides (TCK/Helix/Gantry/YOOtheme) routed to REVIEW not ALERT, token-hygiene paragraph. Fix prompt got the same write-side guardrails. Same goals, ~30% less false-positive yield on a real fix session.
+
+### Migration
+
+In-place upgrade from 2.3.2. No schema changes; no settings changes. Existing chat sessions stuck in the old shape repair themselves on the next chat turn.
+
 ## [2.3.2] — 2026-04-29
 
 Single-purpose patch release: fixes the empty-changelog-modal in Joomla's Extension Manager.

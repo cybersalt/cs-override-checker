@@ -262,7 +262,6 @@ final class OverridesController extends ApiController
                 'attributes' => [
                     'side'     => $side,
                     'path'     => $this->relativizePath($path),
-                    'absolute' => $path,
                     'hash'     => $hash,
                     'size'     => $size,
                     'modified' => $modified,

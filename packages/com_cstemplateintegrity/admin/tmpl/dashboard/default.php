@@ -55,18 +55,12 @@ $backupsUrl         = Route::_('index.php?option=com_cstemplateintegrity&view=ba
             <span class="icon-list" aria-hidden="true"></span>
             <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_SUBMENU_SESSIONS'); ?>
         </a>
-        <form action="<?php echo $this->escape($rescanAction); ?>"
-              method="post"
-              class="d-inline m-0"
-              onsubmit="return confirm('<?php echo $this->escape(Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_CONFIRM'), 'JavaScript'); ?>');">
-            <?php echo HTMLHelper::_('form.token'); ?>
-            <input type="hidden" name="task" value="display.rescan">
-            <button type="submit" class="btn csti-rescan-btn"
-                    title="<?php echo $this->escape(Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_TOOLTIP')); ?>">
-                <span class="icon-refresh" aria-hidden="true"></span>
-                <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_BUTTON'); ?>
-            </button>
-        </form>
+        <button type="button" class="btn csti-rescan-btn"
+                data-csti-open-rescan
+                title="<?php echo $this->escape(Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_TOOLTIP')); ?>">
+            <span class="icon-refresh" aria-hidden="true"></span>
+            <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_BUTTON'); ?>
+        </button>
         <button type="button" class="btn btn-info" data-csti-open-diag>
             <span class="icon-info" aria-hidden="true"></span>
             <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_DIAGNOSTICS_BUTTON'); ?>
@@ -198,6 +192,9 @@ $backupsUrl         = Route::_('index.php?option=com_cstemplateintegrity&view=ba
                         <?php echo Text::sprintf('COM_CSTEMPLATEINTEGRITY_DASHBOARD_AUTOSCAN_NOTE', (int) $this->autoScanMaxOverrides, (int) $this->autoScanMaxOverrides); ?>
                     </small>
                 </p>
+                <div class="alert alert-info py-2 mb-3" role="status">
+                    <small><?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_AUTOSCAN_TIER_NOTE'); ?></small>
+                </div>
                 <form action="<?php echo $this->escape($runScanAction); ?>"
                       method="post"
                       data-csti-runscan
@@ -206,7 +203,7 @@ $backupsUrl         = Route::_('index.php?option=com_cstemplateintegrity&view=ba
                       data-loading-body="<?php echo $this->escape(Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_AUTOSCAN_LOADING_BODY')); ?>">
                     <?php echo HTMLHelper::_('form.token'); ?>
                     <input type="hidden" name="task" value="display.runScan">
-                    <button type="submit" class="btn btn-primary btn-lg">
+                    <button type="submit" class="btn btn-success btn-lg">
                         <span class="icon-rocket" aria-hidden="true"></span>
                         <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_AUTOSCAN_BUTTON'); ?>
                     </button>
@@ -220,13 +217,17 @@ $backupsUrl         = Route::_('index.php?option=com_cstemplateintegrity&view=ba
                     <span class="icon-rocket" aria-hidden="true"></span>
                     <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_AUTOSCAN_TITLE'); ?>
                 </h3>
-                <div class="alert alert-warning d-flex align-items-center mb-0" role="alert">
+                <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
                     <span class="icon-warning me-2 fs-4" aria-hidden="true"></span>
                     <div>
                         <strong><?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_AUTOSCAN_NOKEY_TITLE'); ?></strong>
                         <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_AUTOSCAN_NOKEY_BODY'); ?>
                     </div>
                 </div>
+                <a href="<?php echo $this->escape($this->optionsUrl); ?>" class="btn btn-primary">
+                    <span class="icon-options" aria-hidden="true"></span>
+                    <?php echo Text::_('JTOOLBAR_OPTIONS'); ?>
+                </a>
             </div>
         </div>
     <?php endif; ?>
@@ -324,5 +325,75 @@ $backupsUrl         = Route::_('index.php?option=com_cstemplateintegrity&view=ba
             <span class="label"><?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_DIAGNOSTICS_AUTOSCAN_CAP'); ?></span>
             <span class="value"><?php echo $this->escape($this->autoScanMaxOverrides); ?> overrides per call</span>
         </div>
+    </div>
+</div>
+
+<!--
+    Rescan picker modal — opened by the [data-csti-open-rescan] button
+    in the navigation row. Lets the user tick which template(s) to
+    rebuild the override tracker for, instead of always rescanning
+    every enabled template. Posts to display.rescan with templates[]
+    array (extension_ids); empty array → all (the original behavior).
+-->
+<div id="csti-rescan-overlay" class="csti-rescan-overlay" role="dialog" aria-modal="true" aria-labelledby="csti-rescan-title">
+    <div class="csti-rescan-card">
+        <h3 id="csti-rescan-title">
+            <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_MODAL_TITLE'); ?>
+            <button type="button" class="btn btn-sm btn-secondary" data-csti-rescan-close>
+                <?php echo Text::_('JCANCEL'); ?>
+            </button>
+        </h3>
+
+        <p><?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_MODAL_INTRO'); ?></p>
+
+        <?php if (empty($this->rescanTemplates)) : ?>
+            <div class="alert alert-info mb-0">
+                <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_MODAL_NO_TEMPLATES'); ?>
+            </div>
+        <?php else : ?>
+            <form action="<?php echo $this->escape($rescanAction); ?>"
+                  method="post"
+                  data-csti-rescan-form
+                  onsubmit="return confirm('<?php echo $this->escape(Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_CONFIRM'), 'JavaScript'); ?>');">
+                <?php echo HTMLHelper::_('form.token'); ?>
+                <input type="hidden" name="task" value="display.rescan">
+
+                <div class="csti-rescan-selectall">
+                    <label class="d-flex align-items-center gap-2 m-0" for="csti-rescan-selectall">
+                        <input type="checkbox" id="csti-rescan-selectall" data-csti-rescan-selectall>
+                        <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_MODAL_SELECT_ALL'); ?>
+                    </label>
+                </div>
+
+                <?php foreach ($this->rescanTemplates as $tpl) : ?>
+                    <div class="csti-rescan-row">
+                        <label for="csti-rescan-tpl-<?php echo (int) $tpl['extension_id']; ?>">
+                            <input type="checkbox"
+                                   id="csti-rescan-tpl-<?php echo (int) $tpl['extension_id']; ?>"
+                                   name="templates[]"
+                                   value="<?php echo (int) $tpl['extension_id']; ?>"
+                                   data-csti-rescan-pick>
+                            <span>
+                                <strong><?php echo $this->escape($tpl['element']); ?></strong>
+                                <span class="badge bg-secondary ms-2"><?php echo $this->escape($tpl['client_label']); ?></span>
+                            </span>
+                        </label>
+                        <span class="csti-rescan-meta">
+                            <?php echo Text::sprintf('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_MODAL_OVERRIDE_COUNT', (int) $tpl['existing_overrides']); ?>
+                        </span>
+                    </div>
+                <?php endforeach; ?>
+
+                <div class="csti-rescan-actions">
+                    <button type="button" class="btn btn-secondary" data-csti-rescan-close>
+                        <?php echo Text::_('JCANCEL'); ?>
+                    </button>
+                    <button type="submit" class="btn csti-rescan-btn" data-csti-rescan-submit disabled>
+                        <span class="icon-refresh" aria-hidden="true"></span>
+                        <?php echo Text::_('COM_CSTEMPLATEINTEGRITY_DASHBOARD_RESCAN_MODAL_SUBMIT'); ?>
+                    </button>
+                </div>
+            </form>
+        <?php endif; ?>
     </div>
 </div>

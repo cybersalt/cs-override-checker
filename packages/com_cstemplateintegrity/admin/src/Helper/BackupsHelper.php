@@ -123,21 +123,122 @@ final class BackupsHelper
     }
 
     /**
+     * Sortable column whitelist — keys are the URL-facing sort tokens,
+     * values are the DB column names. Anything outside this list is
+     * silently rejected by listFiltered() and falls back to created_at.
+     *
+     * @var array<string, string>
+     */
+    private const SORT_COLUMNS = [
+        'saved'   => 'created_at',
+        'session' => 'session_id',
+        'file'    => 'file_path',
+        'size'    => 'file_size',
+    ];
+
+    public const LIMIT_OPTIONS = [20, 50, 100, 200, 500];
+
+    /**
      * @return list<\stdClass>
      */
     public static function listRecent(int $limit = 100): array
     {
+        return self::listFiltered([], 'saved', 'desc', $limit);
+    }
+
+    /**
+     * @param array{search?: string, session_id?: int|string} $filter
+     * @return list<\stdClass>
+     */
+    public static function listFiltered(array $filter, string $sort = 'saved', string $dir = 'desc', int $limit = 100): array
+    {
         $db    = Factory::getContainer()->get(DatabaseInterface::class);
+        $query = self::buildBaseQuery($db, $filter);
+
+        $column    = self::SORT_COLUMNS[$sort] ?? 'created_at';
+        $direction = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
+        $query->order($db->quoteName($column) . ' ' . $direction);
+        // Secondary key keeps identical-timestamp rows deterministic.
+        $query->order($db->quoteName('id') . ' ' . $direction);
+
         $limit = max(1, min(500, $limit));
-
-        $query = $db->getQuery(true)
-            ->select($db->quoteName(['id', 'session_id', 'file_path', 'file_hash', 'file_size', 'created_by', 'created_at']))
-            ->from($db->quoteName('#__cstemplateintegrity_backups'))
-            ->order($db->quoteName('created_at') . ' DESC');
-
         $db->setQuery($query, 0, $limit);
 
         return $db->loadObjectList() ?: [];
+    }
+
+    /**
+     * Distinct session ids referenced from the backups table, joined
+     * with the sessions table for the display name. Drives the
+     * session-id filter dropdown so users can pick rather than type.
+     *
+     * @return list<array{id: int|string, label: string}>
+     */
+    public static function distinctSessions(): array
+    {
+        $db = Factory::getContainer()->get(DatabaseInterface::class);
+
+        $query = $db->getQuery(true)
+            ->select([
+                'DISTINCT ' . $db->quoteName('b.session_id', 'id'),
+                $db->quoteName('s.name', 'name'),
+            ])
+            ->from($db->quoteName('#__cstemplateintegrity_backups', 'b'))
+            ->leftJoin(
+                $db->quoteName('#__cstemplateintegrity_sessions', 's')
+                . ' ON ' . $db->quoteName('s.id') . ' = ' . $db->quoteName('b.session_id')
+            )
+            ->where($db->quoteName('b.session_id') . ' IS NOT NULL')
+            ->order($db->quoteName('b.session_id') . ' DESC');
+
+        $rows = $db->setQuery($query)->loadObjectList() ?: [];
+
+        $out = [];
+        foreach ($rows as $row) {
+            $id    = (int) $row->id;
+            $name  = trim((string) ($row->name ?? ''));
+            $label = $name !== '' ? '#' . $id . ' — ' . $name : '#' . $id;
+            $out[] = ['id' => $id, 'label' => $label];
+        }
+
+        $orphanQuery = $db->getQuery(true)
+            ->select('1')
+            ->from($db->quoteName('#__cstemplateintegrity_backups'))
+            ->where($db->quoteName('session_id') . ' IS NULL');
+
+        if ($db->setQuery($orphanQuery, 0, 1)->loadResult() !== null) {
+            array_unshift($out, ['id' => 'none', 'label' => '(no session)']);
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param array{search?: string, session_id?: int|string} $filter
+     */
+    private static function buildBaseQuery(DatabaseInterface $db, array $filter)
+    {
+        $query = $db->getQuery(true)
+            ->select($db->quoteName(['id', 'session_id', 'file_path', 'file_hash', 'file_size', 'created_by', 'created_at']))
+            ->from($db->quoteName('#__cstemplateintegrity_backups'));
+
+        $search = trim((string) ($filter['search'] ?? ''));
+        if ($search !== '') {
+            $like = '%' . $search . '%';
+            $query->where($db->quoteName('file_path') . ' LIKE :search');
+            $query->bind(':search', $like);
+        }
+
+        $sessionFilter = (string) ($filter['session_id'] ?? '');
+        if ($sessionFilter === 'none') {
+            $query->where($db->quoteName('session_id') . ' IS NULL');
+        } elseif ($sessionFilter !== '' && (int) $sessionFilter > 0) {
+            $sid = (int) $sessionFilter;
+            $query->where($db->quoteName('session_id') . ' = :sid');
+            $query->bind(':sid', $sid, ParameterType::INTEGER);
+        }
+
+        return $query;
     }
 
     public static function find(int $id): ?\stdClass

@@ -48,8 +48,34 @@ final class DisplayController extends BaseController
         /** @var CMSApplication $app */
         $app = $this->app;
 
+        // Optional template-id filter from the picker modal. Posted as
+        // templates[] = "12" / "47" etc. Empty / absent → null (rescan
+        // every enabled template, the original "reset all" behavior).
+        // Non-empty → filter to those extension_ids only, after we've
+        // validated each one exists on the picker list (defends against
+        // a hand-crafted POST with arbitrary template ids).
+        $rawIds = (array) $app->getInput()->post->get('templates', [], 'array');
+        $filter = null;
+        if (!empty($rawIds)) {
+            $allowed = array_map(
+                static fn ($t) => (int) $t['extension_id'],
+                RescanHelper::listTemplatesWithOverrideDirs()
+            );
+            $picked  = array_values(array_unique(array_map('intval', $rawIds)));
+            $filter  = array_values(array_intersect($picked, $allowed));
+
+            if (empty($filter)) {
+                $app->enqueueMessage(
+                    Text::_('COM_CSTEMPLATEINTEGRITY_RESCAN_NO_VALID_TEMPLATES'),
+                    'warning'
+                );
+                $this->setRedirect(Route::_('index.php?option=com_cstemplateintegrity&view=dashboard', false));
+                return;
+            }
+        }
+
         try {
-            $stats = RescanHelper::rebuildOverrideTracker();
+            $stats = RescanHelper::rebuildOverrideTracker($filter);
             $app->enqueueMessage(
                 Text::sprintf(
                     'COM_CSTEMPLATEINTEGRITY_RESCAN_SUCCESS',

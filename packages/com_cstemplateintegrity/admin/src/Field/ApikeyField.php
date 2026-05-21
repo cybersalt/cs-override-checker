@@ -7,19 +7,22 @@
  *
  * Custom form field for the Anthropic API key in component Options.
  *
- * Why not type="password"?
- *   Joomla's password field truncated the saved value during testing
- *   (lost ~9 chars off the end of a 108-char Anthropic key). The
- *   v2.0.0 fix was switching to type="text" — which round-trips fully
- *   but renders the key in plaintext, vulnerable to shoulder-surfing
- *   (audit finding I-9).
+ * Why not extend PasswordField?
+ *   Joomla's PasswordField FormField class truncated the saved value
+ *   during testing (lost ~9 chars off the end of a 108-char Anthropic
+ *   key — its PHP-side filter normalised the input in a way that
+ *   chopped legitimate characters). v2.0.0 worked around it by
+ *   extending TextField; we still do, so saves stay on the TextField
+ *   round-trip path that's known to preserve the full value.
  *
- * What this field does:
- *   Renders a normal type="text" input (so the key persists intact),
- *   wraps it in a Bootstrap input-group with a "Reveal" toggle, and
- *   applies a CSS blur filter to the input by default. Focusing the
- *   field OR clicking the toggle removes the blur. Click-out
- *   re-blurs unless the toggle was used.
+ * How the masking works now:
+ *   Even though the FormField PHP type is "Apikey" (extending
+ *   TextField), the rendered HTML <input> has type="password" so the
+ *   browser masks the value with real bullets the moment it is
+ *   typed or pasted. No CSS blur, no visible-then-blurred flicker.
+ *   The Reveal toggle flips the HTML type back to "text" on demand;
+ *   Save still POSTs through TextField, untouched by PasswordField's
+ *   buggy filter.
  *
  * The CSS + JS ride along inline because Joomla's com_config form
  * doesn't auto-load this component's media bundle.
@@ -49,7 +52,15 @@ class ApikeyField extends TextField
     protected function getInput()
     {
         // Build a default text input via the parent renderer, then
-        // splice in a class so the CSS rule below targets it.
+        // (a) splice in a class so the helper CSS targets it, and
+        // (b) flip the HTML type from "text" to "password" so the
+        // browser masks the value with real bullets the instant it
+        // is typed or pasted. Joomla's FormField *PHP* type is still
+        // Apikey extending TextField — only the rendered HTML type
+        // changes — so saves stay on the TextField path that fixed
+        // the v2.0.0 truncation bug. The Reveal toggle below swaps
+        // the type back to "text" when the user wants to see the
+        // value (and back to "password" on second click).
         $textInput = parent::getInput();
         $textInput = preg_replace(
             '/\bclass="([^"]*)"/',
@@ -58,7 +69,6 @@ class ApikeyField extends TextField
             1
         );
         if ($textInput === null || strpos($textInput, 'csti-apikey-input') === false) {
-            // No existing class attribute on the input — inject one.
             $textInput = (string) preg_replace(
                 '/<input\s/',
                 '<input class="csti-apikey-input" ',
@@ -66,6 +76,12 @@ class ApikeyField extends TextField
                 1
             );
         }
+        $textInput = (string) preg_replace(
+            '/\btype="text"/',
+            'type="password"',
+            (string) $textInput,
+            1
+        );
 
         $reveal = htmlspecialchars(
             (string) Text::_('COM_CSTEMPLATEINTEGRITY_FIELD_APIKEY_REVEAL'),
@@ -148,26 +164,17 @@ class ApikeyField extends TextField
 
         // Inline CSS + JS ride along with the field so the Options
         // form, which is rendered by com_config and doesn't load our
-        // media bundle, picks them up. The blur is removed on focus
-        // (so the user can click the field to verify what they
-        // pasted) AND on the toggle button click (sticky reveal).
+        // media bundle, picks them up. The HTML type="password" swap
+        // above handles all the actual masking — the browser shows
+        // bullets/asterisks the instant the value is typed or pasted,
+        // with no visible-then-blurred flicker the old CSS-blur
+        // approach suffered from. The Reveal toggle below swaps the
+        // input type to "text" when the user wants to read the value.
         $css = <<<CSS
 <style>
 .csti-apikey-input {
-    filter: blur(5px);
-    transition: filter 0.15s ease-out;
     font-family: var(--bs-font-monospace, monospace);
     letter-spacing: 0.02em;
-}
-/*
- * Skip the blur when the field is empty so the user can see where
- * to paste. Also skip when focused (so they can verify what they
- * pasted) and when the Reveal toggle has been clicked.
- */
-.csti-apikey-input:focus,
-.csti-apikey-input.is-revealed,
-.csti-apikey-input.is-empty {
-    filter: none;
 }
 .csti-apikey-toggle .csti-apikey-toggle-label,
 .csti-apikey-clear .csti-apikey-clear-label {
@@ -188,11 +195,15 @@ CSS;
     if (toggle) {
         var labelEl = toggle.querySelector('.csti-apikey-toggle-label');
         toggle.addEventListener('click', function () {
-            var revealed = input.classList.toggle('is-revealed');
+            // Swap the HTML type between password (masked) and text
+            // (revealed). Native browser masking — no CSS blur, no
+            // momentary visible flash on paste.
+            var revealed = input.type === 'text';
+            input.type   = revealed ? 'password' : 'text';
             if (labelEl) {
-                labelEl.textContent = revealed ? '{$hide}' : '{$reveal}';
+                labelEl.textContent = revealed ? '{$reveal}' : '{$hide}';
             }
-            if (revealed) {
+            if (!revealed) {
                 input.focus();
             }
         });
@@ -211,20 +222,16 @@ CSS;
         });
     }
 
-    // Two things we keep in sync with input.value:
-    //   1. The .is-empty class on the input — when set, CSS skips the
-    //      blur filter so the user can see where to paste.
-    //   2. Visibility of the optional Get-token / help link — only
-    //      relevant while the field is empty; hidden once a value
-    //      is present so it doesn't compete with the saved token.
+    // Hide the Get-token help link the moment the field has a value —
+    // saved token means the user knows where to find theirs, the help
+    // link just adds noise. Re-shown on Clear.
     function syncToValue() {
-        var empty = input.value === '';
-        input.classList.toggle('is-empty', empty);
         if (helpBtn) {
-            helpBtn.style.display = empty ? '' : 'none';
+            helpBtn.style.display = input.value === '' ? '' : 'none';
         }
     }
     input.addEventListener('input', syncToValue);
+
     syncToValue();
 })();
 </script>

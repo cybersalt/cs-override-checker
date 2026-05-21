@@ -19,6 +19,37 @@
     <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
+        <version>2.3.3</version>
+        <addition>
+            <item>Per-template rescan picker on the dashboard — modal with one checkbox per template that actually has overrides on disk.</item>
+            <item>Restore button on each row of the File backups list, with JS confirm and per-row CSRF.</item>
+            <item>Joomla-native filter bar (js-stools + Choices.js) on Action log and File backups list — search, action-type / session dropdowns, limit, clear.</item>
+            <item>Sortable column headers on Action log (Time / Action / Session) and File backups (Saved / File / Size / Session) with URL-preserved state.</item>
+            <item>Date + time on both list views — YYYY-MM-DD on top, HH:MM:SS below in muted text.</item>
+            <item>API tier note on the Method 2 (Run automated scan) card, explaining Anthropic's per-minute token-budget tiers.</item>
+            <item>"Open Options" button below the no-API-key warning, with base64-encoded return URL so save brings the user back to the dashboard.</item>
+        </addition>
+        <security>
+            <item>API key fields (Anthropic key and Joomla API token) now use native HTML type="password" masking instead of CSS blur — bytes are masked the instant they're pasted, no visible flicker.</item>
+            <item>dismiss_all tool removed from the chat-with-Claude agent. The model misinterpreted "mark these 10 as checked" as "clear all 70 rows" in a real test session; bulk-clear now lives only in the dashboard's per-template rescan picker.</item>
+            <item>Absolute filesystem path removed from the override-file and core-file API responses (data.attributes.absolute) — redundant with the already-relativized "path" field; was leaking the hosting account's directory layout to anyone with a valid Joomla API token.</item>
+        </security>
+        <fix>
+            <item>Sortable column headers actually sort now. The sort link URL was double-encoded (Route::_ default xhtml + htmlspecialchars), so query params arrived as amp;view, amp;sort etc. — with no real view present, Joomla bounced to the dashboard.</item>
+            <item>Chat-with-Claude no longer 400s on "tool_use ids found without tool_result blocks immediately after". A new repair pass runs on every chat turn (before append and before save) that synthesises missing tool_result blocks, reorders them to the front of mixed user content, and merges consecutive same-role messages. Self-healing — sessions stuck on the old shape repair on the next turn.</item>
+            <item>Restoring a backup from the list view now redirects back to the list, not the detail page (which still showed the "Restore now" modal and looked like the action hadn't happened).</item>
+            <item>Empty Anthropic API key field is no longer rejected on save — config XML now allows clearing the saved key.</item>
+        </fix>
+        <change>
+            <item>"Run automated scan now" button changed from blue (btn-primary) to green (btn-success) to distinguish action-buttons from copy-the-prompt buttons.</item>
+            <item>Chat-with-Claude rate-limit posture for 10K-TPM-tier Anthropic accounts: older tool payloads compressed at API-send time, per-turn tool-result byte cap (12 KB), system prompt steers toward small batches and terse replies.</item>
+            <item>v2 scan-with-Claude prompt rewrite — severity now judged relative to core (was absolute, falsely flagging every legacy override that mirrors core's intentionally-raw output), normalize-before-diff rule, alternative-layout handling, mandatory code-execution indicator scan, JSON:API response shape docs, STOP-on-write-failure rule, privilege precondition on every ALERT, framework-generated overrides (TCK/Helix/Gantry/YOOtheme) routed to REVIEW not ALERT, token-hygiene paragraph.</item>
+        </change>
+    </changelog>
+
+    <changelog>
+        <element>pkg_cstemplateintegrity</element>
+        <type>package</type>
         <version>2.3.2</version>
         <fix>
             <item>Extension manager changelog modal now renders correctly. The &lt;changelogurl&gt; was pointing at CHANGELOG.html (human-readable HTML) instead of a Joomla-format changelog XML, so the modal opened blank when a user clicked the version badge. Both the package manifest and updates.xml now point at this file (changelog.xml), which is the schema Joomla actually parses.</item>

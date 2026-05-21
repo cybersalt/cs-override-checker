@@ -184,6 +184,7 @@ $b = $this->backup;
                     <?php echo HTMLHelper::_('form.token'); ?>
                     <input type="hidden" name="task" value="backups.restore">
                     <input type="hidden" name="id" value="<?php echo (int) $b->id; ?>">
+                    <input type="hidden" name="return" value="backup">
                     <button type="submit"
                             class="btn btn-success"
                             id="cstemplateintegrity-restore-confirm-btn"

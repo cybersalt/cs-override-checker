@@ -34,13 +34,32 @@ final class RescanHelper
      * Walk every enabled template's html/ folder and insert
      * missing #__template_overrides rows for the files found.
      *
+     * @param  list<int>|null  $extensionIdFilter  Optional whitelist of
+     *     `#__extensions.extension_id` values. When non-null, only those
+     *     templates are rescanned (others are skipped). When null, every
+     *     enabled template is rescanned (the original "reset all" behavior).
+     *     Empty list throws — callers must pass null for "all," not [].
+     *
      * @return array{inserted: int, scanned: int, templates: int}
      */
-    public static function rebuildOverrideTracker(): array
+    public static function rebuildOverrideTracker(?array $extensionIdFilter = null): array
     {
+        if ($extensionIdFilter !== null && empty($extensionIdFilter)) {
+            throw new \RuntimeException('No templates selected for rescan.');
+        }
+
         $db        = Factory::getContainer()->get(DatabaseInterface::class);
         $templates = self::listTemplates($db);
-        $now       = Factory::getDate()->toSql();
+
+        if ($extensionIdFilter !== null) {
+            $allowed   = array_map('intval', $extensionIdFilter);
+            $templates = array_values(array_filter(
+                $templates,
+                static fn ($t) => in_array((int) $t->extension_id, $allowed, true)
+            ));
+        }
+
+        $now = Factory::getDate()->toSql();
 
         $stats = ['inserted' => 0, 'scanned' => 0, 'templates' => count($templates)];
 
@@ -89,6 +108,68 @@ final class RescanHelper
         $logStats();
 
         return $stats;
+    }
+
+    /**
+     * Enumerate enabled templates for the per-template rescan picker.
+     *
+     * Returns one entry per enabled template that has an html/ override
+     * directory on disk. Templates whose html/ folder is missing are
+     * skipped — they have no overrides for us to rescan, and showing
+     * them in the picker would just confuse the user.
+     *
+     * @return list<array{
+     *     extension_id: int,
+     *     element: string,
+     *     client_id: int,
+     *     client_label: string,
+     *     html_dir: string,
+     *     existing_overrides: int
+     * }>
+     */
+    public static function listTemplatesWithOverrideDirs(): array
+    {
+        $db        = Factory::getContainer()->get(DatabaseInterface::class);
+        $templates = self::listTemplates($db);
+
+        $result = [];
+
+        foreach ($templates as $template) {
+            $clientId = (int) $template->client_id;
+            $name     = (string) $template->element;
+            $extId    = (int) $template->extension_id;
+
+            $root    = $clientId === 1 ? JPATH_ADMINISTRATOR : JPATH_SITE;
+            $htmlDir = $root . '/templates/' . $name . '/html';
+
+            if (!is_dir($htmlDir)) {
+                continue;
+            }
+
+            $result[] = [
+                'extension_id'       => $extId,
+                'element'            => $name,
+                'client_id'          => $clientId,
+                'client_label'       => $clientId === 1 ? 'Administrator' : 'Site',
+                'html_dir'           => $htmlDir,
+                'existing_overrides' => self::countOverridesForTemplate($db, $name, $clientId),
+            ];
+        }
+
+        return $result;
+    }
+
+    private static function countOverridesForTemplate(DatabaseInterface $db, string $template, int $clientId): int
+    {
+        $query = $db->getQuery(true)
+            ->select('COUNT(*)')
+            ->from($db->quoteName('#__template_overrides'))
+            ->where($db->quoteName('template') . ' = :template')
+            ->where($db->quoteName('client_id') . ' = :client_id')
+            ->bind(':template',  $template)
+            ->bind(':client_id', $clientId, ParameterType::INTEGER);
+
+        return (int) $db->setQuery($query)->loadResult();
     }
 
     /**

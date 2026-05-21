@@ -33,6 +33,19 @@ final class BackupsController extends BaseController
         $app = $this->app;
         $id  = (int) $app->getInput()->getInt('id', 0);
 
+        // Where to send the user after the restore finishes. The list
+        // view's per-row restore button posts return=backups; the
+        // detail-view modal omits it (and lands back on the detail
+        // page, where the user originally was). Anything else falls
+        // through to the list, which is the safer default — staying
+        // on the detail page after a successful restore can read as
+        // "did the action actually happen?" because the page is still
+        // titled with the backup id.
+        $returnTarget = (string) $app->getInput()->getString('return', '');
+        $redirectUrl  = $returnTarget === 'backup' && $id > 0
+            ? 'index.php?option=com_cstemplateintegrity&view=backup&id=' . $id
+            : 'index.php?option=com_cstemplateintegrity&view=backups';
+
         if ($id <= 0) {
             $app->enqueueMessage(Text::_('COM_CSTEMPLATEINTEGRITY_BACKUPS_RESTORE_BAD_ID'), 'error');
             $this->setRedirect(Route::_('index.php?option=com_cstemplateintegrity&view=backups', false));
@@ -56,7 +69,7 @@ final class BackupsController extends BaseController
             );
         }
 
-        $this->setRedirect(Route::_('index.php?option=com_cstemplateintegrity&view=backup&id=' . $id, false));
+        $this->setRedirect(Route::_($redirectUrl, false));
     }
 
     public function delete(): void
