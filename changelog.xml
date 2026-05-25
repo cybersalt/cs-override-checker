@@ -19,6 +19,21 @@
     <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
+        <version>2.4.0</version>
+        <addition>
+            <item>New plg_task_cstemplateintegrity Scheduled-Tasks plugin (group task), auto-enabled on install. One routine: cs-template-integrity Purge old file backups, with per-task params for retention window (days), always-keep-N-most-recent floor, and dry-run mode.</item>
+            <item>Default purge-backups scheduled task seeded on install with retention 30 / min_keep 5 / dry_run Off / interval 24h. Seeded unpublished — admin reviews under System / Scheduled Tasks and enables when ready. Idempotent: re-installs don't create duplicates.</item>
+            <item>ACTION_BACKUP_PURGED entries now appear in the Action log on every purge run, with the full result struct visible in the existing filterable Action log list view.</item>
+        </addition>
+        <change>
+            <item>Package installer auto-enables both child plugins (webservices + task), so neither one starts disabled and requires manual flip-on after install.</item>
+            <item>Plugin language file ships a shim for the Joomla core COM_SCHEDULER_PARAMETERS_FIELDSET_LABEL key, which is missing on some 5.x en-GB packs and rendered as the raw key string on the task edit screen.</item>
+        </change>
+    </changelog>
+
+    <changelog>
+        <element>pkg_cstemplateintegrity</element>
+        <type>package</type>
         <version>2.3.5</version>
         <security>
             <item>Scan prompt now forbids assumption / inference shortcuts during the review pass. A real test run flagged only 1 critical finding on a site that had 2 because Claude inferred a file's verdict from a similar-looking neighbour instead of fetching it. New non-negotiable "No-assumptions rule" requires every flagged override to be fetched and read independently; files not actually fetched must be listed as "not examined this run" with a paused-icon severity rather than silently omitted.</item>

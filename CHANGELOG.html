@@ -2,6 +2,34 @@
     <h1>📋 Cybersalt Template Integrity — Changelog</h1>
 
     <h2>
+        <span class="version-badge">v2.4.0</span>
+        <span class="date">2026-05-25</span>
+    </h2>
+    <p>Feature release: scheduled-task plugin for purging old file backups, so the <code>#__cstemplateintegrity_backups</code> table doesn't grow indefinitely. Backup rows are intended as a short-window safety net for restoring a file after a Claude-applied patch; without a retention policy they accumulated forever.</p>
+
+    <h3><span class="section-icon">🚀</span>New</h3>
+    <ul>
+        <li><strong>New plugin: <code>plg_task_cstemplateintegrity</code></strong> (group <code>task</code>). Registers one Scheduled-Tasks routine: <em>"cs-template-integrity: Purge old file backups"</em>. Auto-enabled on install. Three per-task parameters:
+            <ul>
+                <li><strong>Retention window (days)</strong> &mdash; default 30. Rows older than this are eligible for deletion.</li>
+                <li><strong>Always keep this many most-recent backups</strong> &mdash; default 5. Safety floor: even if all rows are older than the retention window, the N most-recent are never deleted, so the user always has a usable roll-back window.</li>
+                <li><strong>Dry run</strong> &mdash; default Off. When On, the task counts what would be deleted and writes the count to the Action log, but makes no DB changes. Use this to verify a new config before letting it run for real.</li>
+            </ul>
+        </li>
+        <li><strong>Default scheduled task seeded on install</strong> with retention 30 / min_keep 5 / dry_run Off / interval 24h / <strong>state unpublished</strong>. The admin reviews and enables it under <em>System &rarr; Scheduled Tasks</em>. Seeded unpublished so the very first daily tick doesn't delete pre-existing backups before the admin has reviewed the config. Idempotent &mdash; re-installs don't create duplicates.</li>
+        <li><strong><code>ACTION_BACKUP_PURGED</code></strong> entries now appear in the Action log on every task run, with the full result struct (deleted, would_delete, kept_by_floor, retention_days, min_keep, cutoff, dry_run). Visible in the existing filterable Action log list view.</li>
+    </ul>
+
+    <h3><span class="section-icon">🔧</span>Improvements</h3>
+    <ul>
+        <li><strong>Package installer auto-enables both child plugins</strong> (the existing <code>webservices</code> plugin and the new <code>task</code> plugin) &mdash; Joomla installs third-party plugins disabled by default, so without this the API routes 404 and the task type doesn't appear in the Scheduled-Tasks dropdown until the admin manually flips them on.</li>
+        <li><strong>Language shim for <code>COM_SCHEDULER_PARAMETERS_FIELDSET_LABEL</code></strong> &mdash; Joomla 5.x en-GB packs on some point releases are missing this core key, so the "Parameters" tab on the task edit screen rendered as the raw key string. The plugin's language file now defines the key so the global string pool resolves it on every install.</li>
+    </ul>
+
+    <h3>Migration</h3>
+    <p>In-place upgrade from 2.3.5. Schema-compatible. The default purge task is seeded once; on update from 2.3.5 a single seed runs (skipped on subsequent updates via the existing-task idempotency check).</p>
+
+    <h2>
         <span class="version-badge">v2.3.5</span>
         <span class="date">2026-05-25</span>
     </h2>

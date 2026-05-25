@@ -72,6 +72,11 @@ $childExtensions = @(
         Name      = "plg_webservices_cstemplateintegrity"
         SourceDir = Join-Path $scriptDir "packages\plg_webservices_cstemplateintegrity"
         Contents  = @("cstemplateintegrity.xml", "services", "src", "language")
+    },
+    @{
+        Name      = "plg_task_cstemplateintegrity"
+        SourceDir = Join-Path $scriptDir "packages\plg_task_cstemplateintegrity"
+        Contents  = @("cstemplateintegrity.xml", "services", "src", "forms", "language")
     }
 )
 
@@ -83,6 +88,7 @@ $pkgZipPath  = Join-Path $scriptDir $pkgZipName
 Get-ChildItem -Path $scriptDir -Filter "pkg_cstemplateintegrity_v${Version}*.zip" | Remove-Item -Force
 Get-ChildItem -Path $scriptDir -Filter "com_cstemplateintegrity_v${Version}*.zip" | Remove-Item -Force
 Get-ChildItem -Path $scriptDir -Filter "plg_webservices_cstemplateintegrity_v${Version}*.zip" | Remove-Item -Force
+Get-ChildItem -Path $scriptDir -Filter "plg_task_cstemplateintegrity_v${Version}*.zip" | Remove-Item -Force
 
 $pkgStage = Join-Path $scriptDir "build"
 if (Test-Path $pkgStage) { Remove-Item $pkgStage -Recurse -Force }

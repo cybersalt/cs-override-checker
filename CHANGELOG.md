@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.0] — 2026-05-25
+
+Feature release: scheduled-task plugin for purging old file backups, so the `#__cstemplateintegrity_backups` table doesn't grow indefinitely. Backup rows are intended as a short-window safety net for restoring a file after a Claude-applied patch; without a retention policy they accumulated forever.
+
+### 🚀 New
+
+- **New plugin: `plg_task_cstemplateintegrity`** (group `task`). Registers one Scheduled-Tasks routine: *"cs-template-integrity: Purge old file backups"*. Auto-enabled on install. Three per-task parameters:
+  - **Retention window (days)** — default 30. Rows older than this are eligible for deletion.
+  - **Always keep this many most-recent backups** — default 5. Safety floor: even if all rows are older than the retention window, the N most-recent are never deleted, so the user always has a usable roll-back window.
+  - **Dry run** — default Off. When On, the task counts what would be deleted and writes the count to the Action log, but makes no DB changes. Use this to verify a new config before letting it run for real.
+- **Default scheduled task seeded on install** with retention 30 / min_keep 5 / dry_run Off / interval 24h / **state unpublished**. The admin reviews and enables it under *System → Scheduled Tasks*. Seeded unpublished so the very first daily tick doesn't delete pre-existing backups before the admin has reviewed the config. Idempotent — re-installs don't create duplicates.
+- **`ACTION_BACKUP_PURGED`** entries now appear in the Action log on every task run, with the full result struct (`deleted`, `would_delete`, `kept_by_floor`, `retention_days`, `min_keep`, `cutoff`, `dry_run`). Visible in the existing filterable Action log list view.
+
+### 🔧 Improvements
+
+- **Package installer auto-enables both child plugins** (the existing `webservices` plugin and the new `task` plugin) — Joomla installs third-party plugins disabled by default, so without this the API routes 404 and the task type doesn't appear in the Scheduled-Tasks dropdown until the admin manually flips them on.
+- **Language shim for `COM_SCHEDULER_PARAMETERS_FIELDSET_LABEL`** — Joomla 5.x en-GB packs on some point releases are missing this core key, so the "Parameters" tab on the task edit screen rendered as the raw key string. The plugin's language file now defines the key so the global string pool resolves it on every install.
+
+### Migration
+
+In-place upgrade from 2.3.5. Schema-compatible. The default purge task is seeded once; on update from 2.3.5 a single seed runs (skipped on subsequent updates via the existing-task idempotency check).
+
 ## [2.3.5] — 2026-05-25
 
 Prompt-only patch release: closes a false-negative footgun in the scan-with-Claude review pass.

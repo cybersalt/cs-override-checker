@@ -107,6 +107,98 @@ final class BackupsHelper
     }
 
     /**
+     * Delete backup rows older than $days, with optional safety floor
+     * and dry-run. Drives the scheduled-task plugin
+     * (plg_task_cstemplateintegrity) — see
+     * TASKS_MAP['cstemplateintegrity.purgeBackups'].
+     *
+     * Parameters:
+     *   $days     — retention window in days. Floored at 1: a zero
+     *               or negative value would delete every row including
+     *               the one we just created, which is never what the
+     *               user wants and would silently break a restore flow
+     *               that depends on a fresh pre-change snapshot.
+     *   $minKeep  — keep this many most-recent rows regardless of age.
+     *               A safety floor: if a user sets retention=30 days
+     *               on a table whose 5 rows are all 6 months old,
+     *               purging all of them at once kills their roll-back
+     *               window. min_keep=5 says "never delete the 5
+     *               newest". Default 0 = no floor.
+     *   $dryRun   — if true, compute what WOULD be deleted but make
+     *               no DB changes. Used to verify a new task config
+     *               before turning it loose on real data.
+     *
+     * Logs ACTION_BACKUP_PURGED with the full result struct so the
+     * Action log surfaces exactly what the cron job did.
+     *
+     * @return array{
+     *   deleted: int, would_delete: int, kept_by_floor: int,
+     *   retention_days: int, min_keep: int, cutoff: string, dry_run: bool
+     * }
+     */
+    public static function purgeOlderThan(int $days, int $minKeep = 0, bool $dryRun = false): array
+    {
+        $days    = max(1, $days);
+        $minKeep = max(0, $minKeep);
+
+        $db     = Factory::getContainer()->get(DatabaseInterface::class);
+        $cutoff = Factory::getDate('now')->sub(new \DateInterval('P' . $days . 'D'))->toSql();
+
+        // Build the "always keep" set: the $minKeep most-recent rows
+        // by created_at, with id as a tie-breaker so two rows in the
+        // same second can't both fall out of the floor.
+        $keptIds = [];
+        if ($minKeep > 0) {
+            $keepQ = $db->getQuery(true)
+                ->select($db->quoteName('id'))
+                ->from($db->quoteName('#__cstemplateintegrity_backups'))
+                ->order($db->quoteName('created_at') . ' DESC')
+                ->order($db->quoteName('id') . ' DESC');
+            $db->setQuery($keepQ, 0, $minKeep);
+            $keptIds = array_values(array_map('intval', $db->loadColumn() ?: []));
+        }
+
+        // Count what would be deleted (age-eligible AND not in floor).
+        $countQ = $db->getQuery(true)
+            ->select('COUNT(*)')
+            ->from($db->quoteName('#__cstemplateintegrity_backups'))
+            ->where($db->quoteName('created_at') . ' < :cutoff')
+            ->bind(':cutoff', $cutoff);
+        if (!empty($keptIds)) {
+            $countQ->whereNotIn($db->quoteName('id'), $keptIds);
+        }
+        $candidateCount = (int) ($db->setQuery($countQ)->loadResult() ?? 0);
+
+        $result = [
+            'deleted'        => 0,
+            'would_delete'   => $candidateCount,
+            'kept_by_floor'  => count($keptIds),
+            'retention_days' => $days,
+            'min_keep'       => $minKeep,
+            'cutoff'         => $cutoff,
+            'dry_run'        => $dryRun,
+        ];
+
+        if ($dryRun || $candidateCount === 0) {
+            ActionLogHelper::log(ActionLogHelper::ACTION_BACKUP_PURGED, $result);
+            return $result;
+        }
+
+        $deleteQ = $db->getQuery(true)
+            ->delete($db->quoteName('#__cstemplateintegrity_backups'))
+            ->where($db->quoteName('created_at') . ' < :cutoff')
+            ->bind(':cutoff', $cutoff);
+        if (!empty($keptIds)) {
+            $deleteQ->whereNotIn($db->quoteName('id'), $keptIds);
+        }
+        $db->setQuery($deleteQ)->execute();
+
+        $result['deleted'] = $candidateCount;
+        ActionLogHelper::log(ActionLogHelper::ACTION_BACKUP_PURGED, $result);
+        return $result;
+    }
+
+    /**
      * Delete a single backup row.
      */
     public static function delete(int $id): bool

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Per-task parameters form for the cstemplateintegrity.purgeBackups
+    routine. Rendered by com_scheduler in the "Parameters" tab when the
+    user is editing a task instance of this type. Loaded by the
+    TaskPluginTrait::enhanceTaskItemForm() handler we register for
+    onContentPrepareForm.
+
+    The <fields name="params"> wrapper is mandatory — com_scheduler
+    stores task-instance overrides in a single `params` JSON column on
+    #__scheduler_tasks. Fields outside this wrapper render in the UI
+    but their values are never persisted; the save handler only walks
+    the fields under <fields name="params">.
+-->
+<form>
+    <fields name="params">
+        <fieldset name="basic">
+            <field
+                name="retention_days"
+                type="number"
+                min="1"
+                max="3650"
+                default="30"
+                label="PLG_TASK_CSTEMPLATEINTEGRITY_TASK_PURGE_BACKUPS_RETENTION_DAYS_LABEL"
+                description="PLG_TASK_CSTEMPLATEINTEGRITY_TASK_PURGE_BACKUPS_RETENTION_DAYS_DESC"
+                filter="integer"
+                validate="number"
+            />
+
+            <field
+                name="min_keep"
+                type="number"
+                min="0"
+                max="10000"
+                default="5"
+                label="PLG_TASK_CSTEMPLATEINTEGRITY_TASK_PURGE_BACKUPS_MIN_KEEP_LABEL"
+                description="PLG_TASK_CSTEMPLATEINTEGRITY_TASK_PURGE_BACKUPS_MIN_KEEP_DESC"
+                filter="integer"
+                validate="number"
+            />
+
+            <field
+                name="dry_run"
+                type="radio"
+                layout="joomla.form.field.radio.switcher"
+                default="0"
+                label="PLG_TASK_CSTEMPLATEINTEGRITY_TASK_PURGE_BACKUPS_DRY_RUN_LABEL"
+                description="PLG_TASK_CSTEMPLATEINTEGRITY_TASK_PURGE_BACKUPS_DRY_RUN_DESC"
+                filter="integer"
+            >
+                <option value="0">JNO</option>
+                <option value="1">JYES</option>
+            </field>
+        </fieldset>
+    </fields>
+</form>
