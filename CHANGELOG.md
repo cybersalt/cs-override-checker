@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.5] — 2026-05-25
+
+Prompt-only patch release: closes a false-negative footgun in the scan-with-Claude review pass.
+
+### 🔒 Security
+
+- **Scan prompt now forbids assumption / inference shortcuts during the review pass.** A real test run flagged only 1 critical security finding on a site that had 2 — when investigated, Claude reported that it had "assumed something when searching" rather than fetching and reading every file independently. The model had cleared a file because it looked similar to an already-cleared neighbour. The scan prompt now includes a **non-negotiable "No-assumptions rule"**: every flagged override must be fetched before any verdict is issued, and inference from filename / path / template / similar-looking-files-already-cleared is explicitly forbidden. Files that were not actually fetched (e.g. because of an API budget cap) cannot get a verdict — they must be listed as "not examined this run" with a ⏸️ icon.
+- **Findings-table completeness audit added to step 4.** Before publishing the report, the model must verify that the table contains a row for **every** flagged id returned by `GET .../overrides`. Silent omissions read as "clear" and produce exactly the kind of false negative this release fixes; the audit catches the omission before the report goes out. A new ⏸️ severity icon distinguishes "not examined this run" from clean ⚪ INFO so the gap is visible to the user.
+
+### Migration
+
+In-place upgrade from 2.3.4. No schema changes; no settings changes. Existing sessions continue to use whatever prompt was in effect when their scan ran — re-run the scan to get a report under the new rules.
+
 ## [2.3.4] — 2026-05-21
 
 Prompt-only patch release: closes the "act on ambiguous pronouns" footgun that has bitten test sessions since chat-with-Claude landed.

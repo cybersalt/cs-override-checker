@@ -19,6 +19,16 @@
     <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
+        <version>2.3.5</version>
+        <security>
+            <item>Scan prompt now forbids assumption / inference shortcuts during the review pass. A real test run flagged only 1 critical finding on a site that had 2 because Claude inferred a file's verdict from a similar-looking neighbour instead of fetching it. New non-negotiable "No-assumptions rule" requires every flagged override to be fetched and read independently; files not actually fetched must be listed as "not examined this run" with a paused-icon severity rather than silently omitted.</item>
+            <item>Findings-table completeness audit added before report publish — model must verify the table contains a row for every flagged id returned by the overrides list endpoint. Silent omissions used to read as clean and produced false negatives; the audit catches the gap before the report goes out.</item>
+        </security>
+    </changelog>
+
+    <changelog>
+        <element>pkg_cstemplateintegrity</element>
+        <type>package</type>
         <version>2.3.4</version>
         <security>
             <item>Scan prompt now produces a "Suggested next-turn prompts" section at the end of every report, with three copy-paste-able prompts that name finding ids explicitly (Fix #1, #3. Mark #2, #4, #5 as checked.) instead of using pronouns. Removes the ambiguity that has caused the chat agent to act on the wrong rows.</item>

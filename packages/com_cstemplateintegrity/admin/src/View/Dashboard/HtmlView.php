@@ -320,8 +320,28 @@ final class HtmlView extends BaseHtmlView
         unless it's an alternative layout (404). Decode `contents` per its
         `encoding`.
 
+        **No-assumptions rule (non-negotiable).** You must FETCH every
+        flagged override before issuing a verdict on it. Do NOT infer a
+        file's contents or verdict from its filename, its path, the
+        template it belongs to, or the verdict of a similar-looking file
+        you already examined. The override checker on a real site has
+        produced false negatives in the past because the reviewer
+        assumed "this looks like the layout file I just cleared, so it
+        is also clear" — and missed a real security finding hiding in
+        the second file. Every flagged row gets its own fetch and its
+        own end-to-end read. If you did not fetch a file, you may not
+        emit any verdict (not even INFO) on it — list it explicitly as
+        "not examined this run" in the report.
+
         ### 3. Analyze
-        For each file:
+        For each file, **independently**:
+
+        Treat every file as if it were the only file in the report.
+        Two files in the same template, with the same filename, in the
+        same layout directory CAN have different verdicts. Resist any
+        shortcut that says "I've seen this pattern before in this
+        template, the rest of these are probably the same." That
+        shortcut is exactly what hides the second real finding.
 
         **a. Normalize, then diff.** Before comparing, normalize line
         endings and trailing whitespace, and ignore reindentation
@@ -391,12 +411,26 @@ final class HtmlView extends BaseHtmlView
            plain words. If there are no action items, say so plainly.
 
         c. **What I checked** — one sentence: how many overrides on which
-           templates.
+           templates. If any were *not* fetched / not examined this run
+           (e.g. truncated by an API budget cap), state that count
+           separately: "Examined N of M flagged overrides; the remaining
+           M-N rows are listed unverified in the findings table."
 
-        d. **Findings table** — one row per flagged override. Columns:
-           Severity (with 🔴/🟡/⚪), File, "What it does" (one short
-           plain-language sentence), "Recommended action" (one short
-           sentence).
+        d. **Findings table** — one row per flagged override. There must
+           be a row for **every** flagged id, including ones that were
+           not examined this run. Never omit a row because you didn't
+           reach it — omission reads as "clear" and produces false
+           negatives. Columns: Severity (with 🔴/🟡/⚪/⏸️ — use ⏸️ for
+           rows that were not examined), File, "What it does" (one
+           short plain-language sentence, or "Not examined this run" if
+           ⏸️), "Recommended action" (one short sentence, or "Re-run
+           the scan to cover this file" if ⏸️).
+
+           Before emitting the table, do a completeness audit: the
+           number of rows in the table must equal the number of
+           flagged overrides returned by step 1's `GET .../overrides`.
+           If it doesn't, you missed something — go back and fix it
+           before publishing.
 
         e. **Technical detail (for developers)** — diff snippets, the
            code-execution scan result, classifier notes, and non-security
