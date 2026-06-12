@@ -2,6 +2,20 @@
     <h1>📋 Cybersalt Template Integrity — Changelog</h1>
 
     <h2>
+        <span class="version-badge">v2.4.1</span>
+        <span class="date">2026-06-12</span>
+    </h2>
+    <p>Maintenance release: switches the Joomla update channel from <code>raw.githubusercontent.com</code> to the Cybersalt Release Manager on <code>cybersalt.com</code>. No code or feature changes.</p>
+
+    <h3><span class="section-icon">🔧</span>Improvements</h3>
+    <ul>
+        <li><strong>Update server moved to the Cybersalt Release Manager.</strong> The <code>&lt;updateservers&gt;</code> URL in the package manifest now points at the Cybersalt Release Manager's <code>api.updatexml</code> endpoint (with <code>element=pkg_cstemplateintegrity</code>) instead of the static <code>updates.xml</code> on GitHub raw. Existing v2.4.0 sites discover this release through the old GitHub channel one last time; from v2.4.1 onwards they check the Cybersalt endpoint directly. SHA256 verification by Joomla's updater is unchanged.</li>
+    </ul>
+
+    <h3>Migration</h3>
+    <p>In-place upgrade from 2.4.0. No schema changes; no settings changes. After this update is installed, the new update-server URL is registered on the site and all future update checks go through cybersalt.com.</p>
+
+    <h2>
         <span class="version-badge">v2.4.0</span>
         <span class="date">2026-05-25</span>
     </h2>

@@ -19,6 +19,15 @@
     <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
+        <version>2.4.1</version>
+        <change>
+            <item>Update server moved from raw.githubusercontent.com to the Cybersalt Release Manager (cybersalt.com / com_csreleasemanager api.updatexml endpoint). Existing 2.4.0 sites discover this release through the old GitHub channel one last time; from 2.4.1 onwards they check the Cybersalt endpoint directly. SHA256 verification by Joomla's updater is unchanged.</item>
+        </change>
+    </changelog>
+
+    <changelog>
+        <element>pkg_cstemplateintegrity</element>
+        <type>package</type>
         <version>2.4.0</version>
         <addition>
             <item>New plg_task_cstemplateintegrity Scheduled-Tasks plugin (group task), auto-enabled on install. One routine: cs-template-integrity Purge old file backups, with per-task params for retention window (days), always-keep-N-most-recent floor, and dry-run mode.</item>

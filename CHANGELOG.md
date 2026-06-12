@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.1] — 2026-06-12
+
+Maintenance release: switches the Joomla update channel from `raw.githubusercontent.com` to the Cybersalt Release Manager on `cybersalt.com`. No code or feature changes.
+
+### 🔧 Improvements
+
+- **Update server moved to the Cybersalt Release Manager.** The `<updateservers>` URL in the package manifest now points at the Cybersalt Release Manager's `api.updatexml` endpoint (with `element=pkg_cstemplateintegrity`) instead of the static `updates.xml` on GitHub raw. Existing v2.4.0 sites discover this release through the old GitHub channel one last time; from v2.4.1 onwards they check the Cybersalt endpoint directly. SHA256 verification by Joomla's updater is unchanged.
+
+### Migration
+
+In-place upgrade from 2.4.0. No schema changes; no settings changes. After this update is installed, the new update-server URL is registered on the site and all future update checks go through cybersalt.com.
+
 ## [2.4.0] — 2026-05-25
 
 Feature release: scheduled-task plugin for purging old file backups, so the `#__cstemplateintegrity_backups` table doesn't grow indefinitely. Backup rows are intended as a short-window safety net for restoring a file after a Claude-applied patch; without a retention policy they accumulated forever.
