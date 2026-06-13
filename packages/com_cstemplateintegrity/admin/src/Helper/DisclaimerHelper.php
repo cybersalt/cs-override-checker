@@ -133,6 +133,12 @@ final class DisclaimerHelper
 .csti-disclaimer-card {
     background: var(--bs-body-bg, #ffffff);
     color: var(--bs-body-color, #212529);
+    /* Scope link color into the card so the host admin template's
+       --bs-link-color can't leak in. Without this, an Atum light-mode
+       --bs-link-color (dark navy) renders unreadably on the dark
+       version of the card whenever the OS prefers dark mode. */
+    --bs-link-color: #0d6efd;
+    --bs-link-hover-color: #0a58ca;
     border: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.15));
     border-radius: 0.5rem;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.4);
@@ -145,18 +151,29 @@ final class DisclaimerHelper
     font-size: 1.4rem;
     color: inherit;
 }
+/* Force every text node inside the card to inherit color from the
+   card. Some admin templates style `label` and `p` with a brand /
+   link color directly, which would otherwise produce dark-navy
+   text on the dark card. !important wins against host rules. */
+.csti-disclaimer-card p,
+.csti-disclaimer-card label,
+.csti-disclaimer-card li { color: inherit !important; }
 .csti-disclaimer-body p     { margin-bottom: 0.85rem; }
 .csti-disclaimer-body strong { color: inherit; }
 .csti-disclaimer-body a {
-    color: var(--bs-link-color, #0d6efd);
+    color: var(--bs-link-color) !important;
     text-decoration: underline;
 }
-.csti-disclaimer-body a:hover { color: var(--bs-link-hover-color, #0a58ca); }
+.csti-disclaimer-body a:hover { color: var(--bs-link-hover-color) !important; }
 .csti-disclaimer-checkrow {
     margin: 1.25rem 0 1rem 0;
     padding: 0.75rem 1rem;
-    background: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.04));
-    border: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.08));
+    /* Slightly more shading + a more visible border so the row reads
+       as an obviously-clickable control in light mode. Earlier values
+       (4% bg, 8% border) were so subtle the row blended into the card
+       and users missed that it was a checkbox. */
+    background: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.20);
     border-radius: 0.375rem;
     color: inherit;
 }
@@ -176,32 +193,27 @@ final class DisclaimerHelper
     color: var(--bs-body-color, #dee2e6) !important;
     border-color: var(--bs-border-color, rgba(255, 255, 255, 0.15));
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.6);
+    /* Hardcoded high-contrast link blue for the dark variant.
+       Don't fall back to the inherited --bs-link-color — the host's
+       light-mode value bleeds through and is unreadable here. */
+    --bs-link-color: #6ea8fe;
+    --bs-link-hover-color: #9ec5fe;
 }
 [data-bs-theme="dark"]      .csti-disclaimer-checkrow,
 [data-color-scheme="dark"]  .csti-disclaimer-checkrow {
-    background: var(--bs-tertiary-bg, rgba(255, 255, 255, 0.06)) !important;
-    border-color: var(--bs-border-color, rgba(255, 255, 255, 0.10));
-}
-[data-bs-theme="dark"]      .csti-disclaimer-body a,
-[data-color-scheme="dark"]  .csti-disclaimer-body a {
-    color: var(--bs-link-color, #6ea8fe) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-/* OS-preference final fallback: when neither attribute is set in the
-   ancestor chain (e.g. an admin template that doesn't ship dark mode
-   at all but the host OS prefers it), still honour the user. */
-@media (prefers-color-scheme: dark) {
-    .csti-disclaimer-card {
-        background: var(--bs-body-bg, #1a1d20);
-        color: var(--bs-body-color, #dee2e6);
-        border-color: var(--bs-border-color, rgba(255, 255, 255, 0.15));
-    }
-    .csti-disclaimer-checkrow {
-        background: var(--bs-tertiary-bg, rgba(255, 255, 255, 0.06));
-        border-color: var(--bs-border-color, rgba(255, 255, 255, 0.10));
-    }
-    .csti-disclaimer-body a { color: var(--bs-link-color, #6ea8fe); }
-}
+/* We intentionally do NOT honour `prefers-color-scheme: dark` here.
+   The popup should match the Joomla admin's theme, not the OS. A
+   light-mode site rendered against a dark-mode OS used to flip the
+   popup to dark while the page behind stayed light, leaving the
+   "Don't show this again" label rendering in the host's light-mode
+   link color against a dark popup background — unreadable. Following
+   only the explicit `data-bs-theme="dark"` / `data-color-scheme="dark"`
+   attribute set by the admin template keeps the popup visually in
+   sync with whatever the user sees in the rest of the admin. */
 </style>
 
 <script>

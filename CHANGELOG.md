@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.2] — 2026-06-12
+
+UX polish release: clearer first-run guidance about saving API tokens in Options, a more readable "Before you start" disclaimer modal on light-mode admins running dark-mode OSes, and a shorter Components-menu label. PHP minimum bumped to 8.3 in line with the new Cybersalt extension baseline.
+
+### 🔧 Improvements
+
+- **Components menu label shortened to "Template Integrity"** (from "Cybersalt Template Integrity"). Applied to all 15 locale INI / SYS.INI files so the left-hand admin menu reads cleanly. The extension's full name and branding are unchanged everywhere else.
+- **Method 1 (manual) — Step 1 copy rewritten.** Step 1 now explains that the Joomla API token can be saved into the component's *Options → Keys & tokens* tab, and that the dashboard prompt will then auto-fill with it on every scan. Users who'd rather not save the token still see the same single-paste instruction. Saved tokens already substituted into the prompt under the v2.4.1 codepath — this is the dashboard catching up to what the code already supported.
+- **Method 1 (manual) — Step 2 placeholder-replace is now conditional.** Step 2 now tells users to replace the `<PASTE YOUR JOOMLA API TOKEN HERE>` placeholder *only if they did not save the token in Step 1*. A new paragraph recommends Claude Code (terminal or desktop) over `claude.ai` in a browser, because at lower Claude plan tiers the review can take long enough that the browser hits its request timeout before Claude finishes responding.
+- **Method 2 (automated) — no-key copy now points at the Options button on the card** (was "in the toolbar above"), names the correct fieldset (*Keys & tokens*, not *AI provider*), and explicitly reassures users that the key stays in their own site's database.
+- **All 14 non-en-GB locales updated to match** the en-GB rewrites for the three dashboard strings above.
+
+### 🐞 Fixes
+
+- **Disclaimer modal contrast on light-mode admins with dark-mode OSes.** v2.4.1's modal CSS honoured `prefers-color-scheme: dark`, which flipped the popup to dark even when the Joomla admin behind it was rendering light — and the host's light-mode `--bs-link-color` (a dark navy) bled into the dark popup, rendering "Don't show this again" unreadable. v2.4.2 removes the OS-preference branch entirely (popup now tracks only the admin template's `data-bs-theme` / `data-color-scheme` attribute), scopes `--bs-link-color` *into* the card so host values can't leak, and forces `<p> <label> <li>` inside the card to `color: inherit !important` defeating any host-template label-as-link styling.
+- **Disclaimer modal — "Don't show this again" row now visibly clickable.** The row's background and border opacities were so subtle (4% / 8% in light mode) that users missed it was a checkbox. Bumped to 6% / 20% in light mode and 8% / 25% in dark mode.
+
+### 🔒 Maintenance
+
+- **PHP minimum bumped from 8.1 to 8.3** in `updates.xml` (`<php_minimum>` field). Reflects the new Cybersalt-wide baseline for all our Joomla extensions. The package manifest's `<targetplatform>` already covered both Joomla 5 and 6 with no PHP constraint, so no manifest change there.
+
+### Migration
+
+In-place upgrade from 2.4.1. No schema changes; no settings changes. The disclaimer modal will re-render with the readable styling on the next page load; the Components menu label will refresh on the next Joomla admin session.
+
 ## [2.4.1] — 2026-06-12
 
 Maintenance release: switches the Joomla update channel from `raw.githubusercontent.com` to the Cybersalt Release Manager on `cybersalt.com`. No code or feature changes.

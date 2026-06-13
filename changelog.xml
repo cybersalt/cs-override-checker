@@ -19,6 +19,24 @@
     <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
+        <version>2.4.2</version>
+        <change>
+            <item>Components-menu label shortened from "Cybersalt Template Integrity" to "Template Integrity" across all 15 locales.</item>
+            <item>Method 1 (manual workflow) — Step 1 dashboard copy now explains that the Joomla API token can be saved in Options → Keys &amp; tokens, and the dashboard prompt will auto-fill with it. Step 2 now makes the placeholder-replace step conditional on whether the user saved the token, and adds a new recommendation to run the manual scan in Claude Code rather than claude.ai because lower plan tiers can take longer than the browser request timeout.</item>
+            <item>Method 2 (automated workflow) — no-key copy now points at the Options button on the card (rather than the admin toolbar), names the correct fieldset, and explicitly notes the key stays in the site's own database. All 14 non-en-GB locales updated to match the en-GB rewrites.</item>
+        </change>
+        <fix>
+            <item>Disclaimer modal contrast on light-mode admins running dark-mode OSes — the popup no longer follows OS dark-mode preference, tracks only the admin template's theme attribute. Body/label/list text inside the card forced to inherit card color, scoped --bs-link-color into the card so host theme values can't leak through. Fixes unreadable "Don't show this again" label on Atum light-mode behind dark-mode OS.</item>
+            <item>"Don't show this again" checkbox row now visibly reads as a clickable control — background and border opacity bumped from 4%/8% to 6%/20% in light mode and 6%/10% to 8%/25% in dark mode.</item>
+        </fix>
+        <maintenance>
+            <item>PHP minimum bumped from 8.1 to 8.3 in updates.xml. Reflects the new Cybersalt-wide baseline.</item>
+        </maintenance>
+    </changelog>
+
+    <changelog>
+        <element>pkg_cstemplateintegrity</element>
+        <type>package</type>
         <version>2.4.1</version>
         <change>
             <item>Update server moved from raw.githubusercontent.com to the Cybersalt Release Manager (cybersalt.com / com_csreleasemanager api.updatexml endpoint). Existing 2.4.0 sites discover this release through the old GitHub channel one last time; from 2.4.1 onwards they check the Cybersalt endpoint directly. SHA256 verification by Joomla's updater is unchanged.</item>
