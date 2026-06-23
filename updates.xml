@@ -5,12 +5,12 @@
         <description>Template-override security review for Joomla, paired with Claude.</description>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
-        <version>2.4.2</version>
+        <version>2.4.3</version>
         <infourl title="Cybersalt Template Integrity">https://github.com/cybersalt/cs-template-integrity</infourl>
         <downloads>
-            <downloadurl type="full" format="zip">https://github.com/cybersalt/cs-template-integrity/releases/download/v2.4.2/pkg_cstemplateintegrity_v2.4.2.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/cybersalt/cs-template-integrity/releases/download/v2.4.3/pkg_cstemplateintegrity_v2.4.3.zip</downloadurl>
         </downloads>
-        <sha256>9eaa2dc92bc3110be378487020b5ccd90acc11d5b6ef2eacbd8e84e9c005e9dd</sha256>
+        <sha256>202706afbfde877245b12090619f521d115c82c3ae61f9da48cedf832043754e</sha256>
         <tags>
             <tag>stable</tag>
         </tags>

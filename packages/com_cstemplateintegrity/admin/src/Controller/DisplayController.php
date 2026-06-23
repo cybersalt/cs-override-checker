@@ -99,7 +99,8 @@ final class DisplayController extends BaseController
      * Validate a model id from component params against the small
      * whitelist we expose in config.xml. Defends against a future
      * config form bypass — if anything other than our three known
-     * model ids comes back from params, fall through to Sonnet.
+     * model ids comes back from params, fall through to Opus (the
+     * configured default).
      */
     private static function resolveModel(string $candidate): string
     {
@@ -108,7 +109,7 @@ final class DisplayController extends BaseController
             'claude-sonnet-4-6',
             'claude-opus-4-7',
         ];
-        return in_array($candidate, $allowed, true) ? $candidate : 'claude-sonnet-4-6';
+        return in_array($candidate, $allowed, true) ? $candidate : 'claude-opus-4-7';
     }
 
     /**
@@ -171,7 +172,7 @@ final class DisplayController extends BaseController
         // override list. Without this PHP would 504 mid-call.
         @set_time_limit(180);
 
-        $scanModel    = self::resolveModel($params->get('scan_model', 'claude-sonnet-4-6'));
+        $scanModel    = self::resolveModel($params->get('scan_model', 'claude-opus-4-7'));
         $maxOverrides = (int) $params->get('scan_max_overrides', ScanRunnerHelper::DEFAULT_MAX_OVERRIDES);
 
         // Log the attempt BEFORE executing so the cap counts in-flight

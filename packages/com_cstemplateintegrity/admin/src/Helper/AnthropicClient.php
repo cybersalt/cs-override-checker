@@ -40,7 +40,7 @@ final class AnthropicClient
 
     private int $keyRawLength = 0;
 
-    public function __construct(string $apiKey, string $model = 'claude-sonnet-4-6')
+    public function __construct(string $apiKey, string $model = 'claude-opus-4-7')
     {
         // Track the raw length (after the caller's trim, before our
         // own whitespace strip) so the fingerprint can show both —

@@ -19,6 +19,21 @@
     <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
+        <version>2.4.3</version>
+        <addition>
+            <item>Auto-scan report now produces the same "Suggested next-turn prompts" the manual workflow has had since v2.3.4 — three prompts when the batch covered everything, four when more overrides remain (the extra "Continue with the next batch" prompt sits at the top; prompts 2 and 3 pick up a "then check the next batch" tail). Real finding ids are substituted into each prompt; never placeholders.</item>
+            <item>Auto-scan system prompt now explicitly forbids Claude from telling the user to "contact a developer" to apply fixes — the user has Claude available right in the session chat box and the suggested next-turn prompts tell them exactly how to ask.</item>
+        </addition>
+        <change>
+            <item>Opus 4.7 is now the default model for both Scan model and Chat model in Options. Applied across config.xml and every PHP fallback path so behavior is consistent. Cost goes up ~5× per scan vs Sonnet; the Cost difference note in Options has been rewritten with "At the time of writing this" framing so users know to verify against current Anthropic pricing.</item>
+            <item>Chat agent no longer requires "type confirm to proceed" when the user has named explicit numbered finding ids — the ids ARE the confirmation, and auto-backup is the rollback safety net. The anti-ambiguous-pronoun guard from v2.3.4 is preserved (pronouns without ids still stop and ask).</item>
+            <item>Cross-locale parity sweep — three help / error strings in every locale (AUTOSCAN_NOTE, RUN_SCAN_NO_KEY, SESSION_CHAT_NOKEY) referenced the Options tab by its old internal name AI provider; brought in line with the actual Keys &amp; tokens label. Plus the five model-related Options strings (SCAN_MODEL_DESC, CHAT_MODEL_DESC, MODEL_SONNET, MODEL_OPUS, MODEL_COST_WARNING) re-translated to reflect the new Opus default. 114 substring replacements across 15 locale files.</item>
+        </change>
+    </changelog>
+
+    <changelog>
+        <element>pkg_cstemplateintegrity</element>
+        <type>package</type>
         <version>2.4.2</version>
         <change>
             <item>Components-menu label shortened from "Cybersalt Template Integrity" to "Template Integrity" across all 15 locales.</item>

@@ -67,7 +67,7 @@ final class ConversationRunner
 
     public const ENDPOINT     = 'https://api.anthropic.com/v1/messages';
     public const API_VERSION  = '2023-06-01';
-    public const DEFAULT_MODEL = 'claude-sonnet-4-6';
+    public const DEFAULT_MODEL = 'claude-opus-4-7';
 
     /**
      * Continue an existing conversation by appending a user message
@@ -289,13 +289,23 @@ final class ConversationRunner
             checked" (referring to a subset) as "clear every row".
             Do NOT extrapolate. Do NOT assume "all". The user must
             type ids.
-          - Before doing ANY destructive action (apply_fix or
-            dismiss_override) on more than one row, restate the plan
-            in one short line and require the user to send back
-            "confirm" or to re-list the ids. Single-row actions can
-            proceed immediately if the user explicitly named that id.
-          - If the user's instruction is ambiguous, ASK before acting.
-            Do not guess at apply_fix bodies.
+          - When the user names explicit numbered finding ids — one
+            id or many — **proceed directly with the apply_fix /
+            dismiss_override calls. Do NOT restate the plan and ask
+            them to reply "confirm".** The explicit ids ARE the
+            user's confirmation. Every apply_fix auto-backs-up the
+            file to #__cstemplateintegrity_backups before writing,
+            so any individual patch is reversible from the File
+            backups list — the safety net does not depend on an
+            extra confirm step. Asking "confirm?" after the user
+            pasted one of the suggested next-turn prompts (or any
+            instruction with explicit ids) makes those prompts
+            useless: the paste IS the action.
+          - If the user's instruction is ambiguous in a different
+            way (vague PATCH content rather than vague ids — e.g.
+            "fix #3" when the finding could be patched several ways
+            and you're not sure which the user wants), ask a
+            targeted question. Do not guess at apply_fix bodies.
           - If a finding doesn't fit "code change" or "configuration
             question" — fix needs a database tweak, plugin reinstall,
             or contacting a third-party developer — STOP and explain

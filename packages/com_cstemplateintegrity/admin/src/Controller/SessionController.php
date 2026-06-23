@@ -147,7 +147,7 @@ final class SessionController extends BaseController
 
         @set_time_limit(180);
 
-        $chatModel = self::resolveModel($params->get('chat_model', 'claude-sonnet-4-6'));
+        $chatModel = self::resolveModel($params->get('chat_model', 'claude-opus-4-7'));
 
         try {
             $result = ConversationRunner::continueConversation($apiKey, $messages, $msg, $id, $chatModel);
@@ -168,7 +168,7 @@ final class SessionController extends BaseController
      * Whitelist a model id from component params against the same set
      * config.xml exposes. Defends against a config-form bypass — if
      * anything other than our three known model ids comes back from
-     * params, fall through to Sonnet.
+     * params, fall through to Opus (the configured default).
      */
     private static function resolveModel(string $candidate): string
     {
@@ -177,6 +177,6 @@ final class SessionController extends BaseController
             'claude-sonnet-4-6',
             'claude-opus-4-7',
         ];
-        return in_array($candidate, $allowed, true) ? $candidate : 'claude-sonnet-4-6';
+        return in_array($candidate, $allowed, true) ? $candidate : 'claude-opus-4-7';
     }
 }

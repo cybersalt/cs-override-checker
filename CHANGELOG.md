@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.3] — 2026-06-22
+
+Auto-scan UX + Opus-as-default release. The automated scan report now produces the same copy-paste-able "Suggested next-turn prompts" the manual workflow has had since v2.3.4 — three prompts when the batch covered everything, four when more overrides remain (the extra prompt continues the next batch). The chat agent no longer requires a typed "confirm" when the user's instruction already names explicit numbered finding ids — the ids ARE the confirmation, and auto-backup is the rollback safety net. Opus becomes the default model for both scan and chat. Cross-locale parity sweep brings 14 other languages in line with the en-GB Options-tab labels and copy.
+
+### 🚀 New
+
+- **Auto-scan report now includes "Suggested next-turn prompts" (section f).** Mirrors the manual workflow's v2.3.4 format: a short heading per prompt, the exact text the user pastes back into the session chat box, with real finding ids substituted (never placeholders). When the scan was capped at `scan_max_overrides` and more flagged overrides remain in the tracker, a fourth prompt appears at the top — *Continue with the next batch of overrides* — and the second and third prompts pick up a *"…then check the next batch"* tail. When the batch covered everything, the standard three-prompt format is used unchanged from the manual workflow.
+- **Auto-scan system prompt explicitly forbids "contact a developer" advice.** v2.4.2 reports occasionally suggested users hire a developer to make changes — even though the user has Claude available right there in the session's chat box with the apply_fix / dismiss_override tools. The new system prompt directs Claude to point users at the section (f) suggested prompts instead.
+
+### 🔧 Improvements
+
+- **Opus 4.7 is now the default model** for both *Scan model* and *Chat model* in Options. Applied consistently across `config.xml`, every PHP fallback path (`AnthropicClient::__construct`, `DisplayController::resolveModel`, `DisplayController::runScan`, `SessionController::resolveModel`, `SessionController::continueChat`, `ScanRunnerHelper::run`, `ConversationRunner::DEFAULT_MODEL`), and the localised model option labels / descriptions. Opus is the most thorough classifier and the most reliable tool-use model — the safer default for a security review extension. Cost goes up ~5× per scan vs Sonnet; the *Cost difference* note in Options has been rewritten to explain this and frame the numbers with "**At the time of writing this**…" so users know to verify against current Anthropic pricing.
+- **Chat agent — no more "type 'confirm' to proceed" interruption.** When the user's instruction names explicit numbered finding ids (one id or many), the chat agent now proceeds directly with the apply_fix / dismiss_override calls. The ids ARE the confirmation; `apply_fix` still auto-backs-up to `#__cstemplateintegrity_backups` before writing, so any individual patch is reversible from File backups regardless. The anti-ambiguous-pronoun guard from v2.3.4 is preserved — "fix those" / "mark them all checked" without ids still triggers a stop-and-ask. Net effect: the suggested next-turn prompts now actually drive the action when pasted, instead of getting blocked by an extra confirm round-trip.
+- **Cross-locale "AI provider" → "Keys & tokens" parity sweep.** Three help/error strings in every locale (`AUTOSCAN_NOTE`, `RUN_SCAN_NO_KEY`, `SESSION_CHAT_NOKEY`) referenced the Options tab by its old internal name *AI provider*. The actual tab label has been *Keys & tokens* in every locale since v2.4.2; this release brings the help strings in line. 44 substring replacements across 15 locale files.
+- **Cross-locale Opus-as-default translations.** The five model-related Options strings (`SCAN_MODEL_DESC`, `CHAT_MODEL_DESC`, `MODEL_SONNET`, `MODEL_OPUS`, `MODEL_COST_WARNING`) re-translated in all 14 non-en-GB locales to reflect the new Opus default and the "At the time of writing this" cost framing. 70 substring replacements.
+
+### Migration
+
+In-place upgrade from 2.4.2. No schema changes; no settings changes. **Existing sites that had `claude-sonnet-4-6` saved explicitly in Options will keep using Sonnet** — the default only applies to new installs or sites that never set the value. Admin users who want Opus on an existing site should open Options → Keys & tokens and pick *Opus 4.7* in the Scan model and Chat model dropdowns.
+
 ## [2.4.2] — 2026-06-12
 
 UX polish release: clearer first-run guidance about saving API tokens in Options, a more readable "Before you start" disclaimer modal on light-mode admins running dark-mode OSes, and a shorter Components-menu label. PHP minimum bumped to 8.3 in line with the new Cybersalt extension baseline.
