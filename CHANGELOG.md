@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.4] — 2026-06-24
+
+JED-submission release. Two fixes spotted by JED Checker on the v2.4.3 package, both prep for the formal Joomla Extension Directory listing.
+
+### 🐞 Fixes
+
+- **Build script: package zip now ships every locale's `pkg_*.sys.ini`.** The `<languages>` block in the package manifest declares all 15 locales (`en-GB`, `de-DE`, `fr-FR`, …) but `build-package.ps1` was only copying `en-GB`'s `pkg_cstemplateintegrity.sys.ini` into the staging root before zipping — Joomla's installer never complained because it falls back to en-GB, but JED Checker rightly flagged 14 "File not found" entries. Build script now does a single `Copy-Item -Recurse` of the entire `language/` tree, so every locale's package-level sys.ini ends up in the zip alongside the en-GB one.
+
+### 🔧 Improvements
+
+- **Extension renamed: "Cybersalt Template Integrity" → "Cybersalt Override Checker".** JED's naming policy bars the reserved word *Template* in extension names (alongside *Module*, *Plugin*, *Component*, etc.) — the rule exists to stop users confusing a content extension with the Joomla building block. *Override Checker* is, if anything, more precise about what the extension actually monitors (template overrides) and keeps the brand half of the name. The change is **cosmetic only**: every internal identifier stays the same — `pkg_cstemplateintegrity`, `com_cstemplateintegrity`, `plg_webservices_cstemplateintegrity`, `plg_task_cstemplateintegrity`, the `Cybersalt\Component\Cstemplateintegrity\…` PHP namespaces, the `#__cstemplateintegrity_*` database tables, the GitHub repo `cs-template-integrity`, and the update-server URL (`element=pkg_cstemplateintegrity`) all remain untouched. So existing installs upgrade in place with no migration, and the data they have keeps working as-is. The user-visible name is what changes — in the package manifest's `<name>` field, in the post-install message, in Extensions → Manage, in every locale's `PKG_…`, `COM_…`, `PLG_…` display-name strings, and in the `<header>` of every dashboard / sessions / actions / backups view. 387 substring replacements across 102 files.
+
+### Migration
+
+In-place upgrade from 2.4.3. No schema changes; no settings changes; no data migration. The first time the admin opens the component after the upgrade, they'll see *"Override Checker"* in the Components menu where *"Template Integrity"* used to be. Nothing else changes.
+
 ## [2.4.3] — 2026-06-22
 
 Auto-scan UX + Opus-as-default release. The automated scan report now produces the same copy-paste-able "Suggested next-turn prompts" the manual workflow has had since v2.3.4 — three prompts when the batch covered everything, four when more overrides remain (the extra prompt continues the next batch). The chat agent no longer requires a typed "confirm" when the user's instruction already names explicit numbered finding ids — the ids ARE the confirmation, and auto-backup is the rollback safety net. Opus becomes the default model for both scan and chat. Cross-locale parity sweep brings 14 other languages in line with the en-GB Options-tab labels and copy.
@@ -28,7 +44,7 @@ UX polish release: clearer first-run guidance about saving API tokens in Options
 
 ### 🔧 Improvements
 
-- **Components menu label shortened to "Template Integrity"** (from "Cybersalt Template Integrity"). Applied to all 15 locale INI / SYS.INI files so the left-hand admin menu reads cleanly. The extension's full name and branding are unchanged everywhere else.
+- **Components menu label shortened to "Override Checker"** (from "Cybersalt Override Checker"). Applied to all 15 locale INI / SYS.INI files so the left-hand admin menu reads cleanly. The extension's full name and branding are unchanged everywhere else.
 - **Method 1 (manual) — Step 1 copy rewritten.** Step 1 now explains that the Joomla API token can be saved into the component's *Options → Keys & tokens* tab, and that the dashboard prompt will then auto-fill with it on every scan. Users who'd rather not save the token still see the same single-paste instruction. Saved tokens already substituted into the prompt under the v2.4.1 codepath — this is the dashboard catching up to what the code already supported.
 - **Method 1 (manual) — Step 2 placeholder-replace is now conditional.** Step 2 now tells users to replace the `<PASTE YOUR JOOMLA API TOKEN HERE>` placeholder *only if they did not save the token in Step 1*. A new paragraph recommends Claude Code (terminal or desktop) over `claude.ai` in a browser, because at lower Claude plan tiers the review can take long enough that the browser hits its request timeout before Claude finishes responding.
 - **Method 2 (automated) — no-key copy now points at the Options button on the card** (was "in the toolbar above"), names the correct fieldset (*Keys & tokens*, not *AI provider*), and explicitly reassures users that the key stays in their own site's database.
@@ -179,7 +195,7 @@ Completes the multilingual rollout started in 2.3.0: all 14 non-English language
   - **Slavic:** ru-RU (Russian), pl-PL (Polish), cs-CZ (Czech)
   - **Other European:** tr-TR (Turkish), el-GR (Greek)
   - **East Asian:** ja-JP (Japanese), zh-CN (Simplified Chinese)
-- All translations use the formal admin-tool register appropriate to each language (formal pronouns where applicable). Brand names ("Cybersalt Template Integrity", "Anthropic", "Claude", "Joomla", "Akeeba Backup"), technical acronyms (API, REST, XSS, SQL, CSRF, JSON, HTTP, PHP), code references (`#__template_overrides`, `JPATH_ROOT`, `sk-ant-…`, file paths, class names), URLs, and printf placeholders (`%s`, `%d`, `%1$d`) are preserved untranslated per Joomla extension convention.
+- All translations use the formal admin-tool register appropriate to each language (formal pronouns where applicable). Brand names ("Cybersalt Override Checker", "Anthropic", "Claude", "Joomla", "Akeeba Backup"), technical acronyms (API, REST, XSS, SQL, CSRF, JSON, HTTP, PHP), code references (`#__template_overrides`, `JPATH_ROOT`, `sk-ant-…`, file paths, class names), URLs, and printf placeholders (`%s`, `%d`, `%1$d`) are preserved untranslated per Joomla extension convention.
 
 ### 🔧 Improvements
 
@@ -201,7 +217,7 @@ Multilingual support: language pack registered for all 15 of Cybersalt's standar
 
 ### Migration
 
-In-place upgrade from 2.2.x. No schema changes; no settings changes. After install, an admin user whose Joomla language is set to `de-DE` will see Cybersalt Template Integrity in German throughout. Other configured languages will continue to display English admin copy until their patch release lands.
+In-place upgrade from 2.2.x. No schema changes; no settings changes. After install, an admin user whose Joomla language is set to `de-DE` will see Cybersalt Override Checker in German throughout. Other configured languages will continue to display English admin copy until their patch release lands.
 
 ## [2.2.0] — 2026-04-29
 
@@ -220,7 +236,7 @@ UX rework on the dashboard: clearer "what do you want to do today" path-finding 
 - **Cybersalt action-button palette.** Method 1 uses `#dc6b1a` Cybersalt orange with white text; Method 2 (with API key) uses Bootstrap blue. Navigation buttons (Sessions / File backups / Site Templates Management / Action log) are neutral grey — they're "go fetch data" buttons, not primary actions. Recipes documented in Joomla Brain § 12 for reuse across Cybersalt extensions.
 - **Top nav reordered alphabetically** — Action log → File backups → Open Site Templates Management → Sessions → Rescan → Diagnostics. Site Templates Management opens in a new tab so the dashboard stays open behind it.
 - **Side-menu reorder** — Dashboard → Action log → File backups → Sessions inside the component admin sidebar.
-- **Brand pass.** Every user-facing page title now reads *Cybersalt Template Integrity* (was *CS Template Integrity*) — Sessions / Action log / File backups / extension manager / API component label / update server name. Code-side identifiers (namespaces, language string keys, file paths, DB tables) keep the `cs` short form. Convention recorded in Joomla Brain `company-info.md`.
+- **Brand pass.** Every user-facing page title now reads *Cybersalt Override Checker* (was *CS Override Checker*) — Sessions / Action log / File backups / extension manager / API component label / update server name. Code-side identifiers (namespaces, language string keys, file paths, DB tables) keep the `cs` short form. Convention recorded in Joomla Brain `company-info.md`.
 - **Get token link** lands on the current admin's user-edit form (`view=user&layout=edit&id={current admin}`) instead of falling through to the user list. `{user_id}` substitution in the field's `helplink` attribute resolves to `Factory::getApplication()->getIdentity()->id` at render time. Route URLs are single-encoded (no more double `&amp;amp;` in the rendered href).
 - **Dark-mode prompt cards** are now slightly elevated (`rgba(255,255,255,0.04)`) so the card edge reads as a real container instead of blending into the page background. Light mode unchanged.
 
@@ -252,7 +268,7 @@ In-place upgrade from 2.1.x. No schema changes; no settings changes. `BackupsHel
 
 ### 🚀 New
 
-- **Choose your Claude model** for the automated workflow. Two new dropdowns under *Components → CS Template Integrity → Options → AI provider*:
+- **Choose your Claude model** for the automated workflow. Two new dropdowns under *Components → CS Override Checker → Options → AI provider*:
   - **Scan model** — Claude model used for the one-shot *Run automated scan*. Default Sonnet 4.6 (good balance). Haiku 4.5 cuts the cost roughly 3× with no real quality loss for the alert/review/info classification job. Opus 4.7 is overkill for routine scans but useful if you want extra rigor on a security-sensitive site.
   - **Chat model** — Claude model for the chat-with-Claude tool-use loop on the session detail page. Default Sonnet 4.6. Tool use is harder than classification; Sonnet is the recommended floor here even if you set the scan model to Haiku — tool calls Claude gets wrong cost more than the model price difference.
 - All three models (`claude-haiku-4-5-20251001`, `claude-sonnet-4-6`, `claude-opus-4-7`) selectable per slot. Both default to Sonnet.
@@ -469,7 +485,7 @@ A real client test on fairviewterracehoa.com triggered the question: the existin
 
 ### Changed
 
-- **Renamed everywhere from `csintegrity` to `cstemplateintegrity`.** "CS Template Integrity" matches Cybersalt's existing extension family naming (`cs-disk-usage` → `com_csdiskusage`, etc.) and also locks the scope: this tool stays focused on template-override integrity. MySites Guru already covers core-file integrity, extension-file integrity, and stowaway-file detection on Joomla, so we don't intend to expand into those.
+- **Renamed everywhere from `csintegrity` to `cstemplateintegrity`.** "CS Override Checker" matches Cybersalt's existing extension family naming (`cs-disk-usage` → `com_csdiskusage`, etc.) and also locks the scope: this tool stays focused on template-override integrity. MySites Guru already covers core-file integrity, extension-file integrity, and stowaway-file detection on Joomla, so we don't intend to expand into those.
 - Component slug `com_csintegrity` → `com_cstemplateintegrity`. Plugin `plg_webservices_csintegrity` → `plg_webservices_cstemplateintegrity`. Package `pkg_csintegrity` → `pkg_cstemplateintegrity`. Library and system-plugin scaffolds renamed to match.
 - Namespace `Cybersalt\Component\Csintegrity\…` → `Cybersalt\Component\Cstemplateintegrity\…`. Plugin namespace `Cybersalt\Plugin\WebServices\Csintegrity\…` → `Cybersalt\Plugin\WebServices\Cstemplateintegrity\…`.
 - Database tables `#__csintegrity_sessions/_actions/_backups` → `#__cstemplateintegrity_sessions/_actions/_backups`.
@@ -481,10 +497,10 @@ A real client test on fairviewterracehoa.com triggered the question: the existin
 There is no automatic upgrade path from v0.9.x. To move a site from v0.9 to v0.10:
 
 1. Note any sessions/backups you want to preserve (download via the admin UI). On a fresh dev site, skip this.
-2. Uninstall **CS Template Integrity** from the Joomla extension manager. This drops the `#__csintegrity_*` tables and the `csintegrity` web-services plugin.
+2. Uninstall **CS Override Checker** from the Joomla extension manager. This drops the `#__csintegrity_*` tables and the `csintegrity` web-services plugin.
 3. Install `pkg_cstemplateintegrity_v0.10.0_*.zip`. The new `#__cstemplateintegrity_*` tables are created at install time.
 4. Enable the **plg_webservices_cstemplateintegrity** plugin in System → Plugins (third-party plugins install disabled by default).
-5. In **System → Permissions** for **CS Template Integrity**, grant *View* and *Modify* to whatever group should be able to use the API/admin (Super Users always pass).
+5. In **System → Permissions** for **CS Override Checker**, grant *View* and *Modify* to whatever group should be able to use the API/admin (Super Users always pass).
 
 ## [0.9.0] — 2026-04-24
 
@@ -641,7 +657,7 @@ This release closes the high- and medium-severity findings from the v0.8.5 secur
 ## [0.6.0] — 2026-04-24
 
 ### Added
-- **Session log.** New table `#__csintegrity_sessions` and an admin "Sessions" view (Components → CS Template Integrity → Sessions submenu). Reports from Claude are stored as sessions named `YYYY-MM-DD-HHMM` by default. Two ways to add a session: paste-in via a form (claude.ai users) or POST to `/api/index.php/v1/csintegrity/sessions` (Claude Code / agentic users — the dashboard prompt template now tells Claude to do this automatically). Each session can be viewed individually with its full report markdown and the action-log entries that ran while it was active. Delete works via the standard admin checkbox toolbar.
+- **Session log.** New table `#__csintegrity_sessions` and an admin "Sessions" view (Components → CS Override Checker → Sessions submenu). Reports from Claude are stored as sessions named `YYYY-MM-DD-HHMM` by default. Two ways to add a session: paste-in via a form (claude.ai users) or POST to `/api/index.php/v1/csintegrity/sessions` (Claude Code / agentic users — the dashboard prompt template now tells Claude to do this automatically). Each session can be viewed individually with its full report markdown and the action-log entries that ran while it was active. Delete works via the standard admin checkbox toolbar.
 - **Action log.** New table `#__csintegrity_actions` and an admin "Action log" view. Every notable event is recorded automatically: install, update, rescan, mark-reviewed, session created/deleted, backup created. `Cybersalt\Component\Csintegrity\Administrator\Helper\ActionLogHelper::log($action, $details, $sessionId)` is the single entry point; calls are wired into `RescanHelper`, `MarkReviewedHelper`, `SessionsHelper`, `BackupsHelper`, and `script.php`'s postflight. Logging failures are swallowed — the audit log can never crash the parent operation.
 - **File backups.** New table `#__csintegrity_backups` and admin "File backups" view. Claude POSTs original file contents to `/api/index.php/v1/csintegrity/backups` before proposing a fix; the original is stored as base64 in the DB along with sha256 and size. Each backup is downloadable from the admin list. Restore-from-backup is intentionally deferred — destructive enough to deserve its own design pass.
 - **Apply Fixes prompt card** on the dashboard. Second copy-paste prompt that asks Claude to back up each affected file (POST to `/backups`) before proposing diffs. Read-only by default; Claude proposes, the admin applies. Pairs with the existing Use-with-Claude card.
@@ -661,7 +677,7 @@ This release closes the high- and medium-severity findings from the v0.8.5 secur
 ## [0.5.1] — 2026-04-24
 
 ### Changed
-- Components-menu label is now "CS Template Integrity" (was "Cybersalt Template Integrity"). The full name still appears on the dashboard page title.
+- Components-menu label is now "CS Override Checker" (was "Cybersalt Override Checker"). The full name still appears on the dashboard page title.
 - "Open Site Templates" link in the After-review card now points at `view=templates&client_id=0` rather than `view=styles&client_id=0` — the templates list is where the per-template "Changes found" override review actually lives.
 - Repositioned the rescan card. Previously framed as a testing utility; reframed as the user-facing remedy for "I (or someone before me) bulk-dismissed overrides without actually checking them." New title "Reset overrides for review", new button "Reset all overrides for review", description rewritten accordingly.
 
@@ -696,7 +712,7 @@ This release closes the high- and medium-severity findings from the v0.8.5 secur
 ## [0.3.0] — 2026-04-24
 
 ### Added
-- Dashboard "Rebuild override tracker" button (admin → Components → Cybersalt Template Integrity). Walks every enabled template's `html/` folder and inserts missing `#__template_overrides` rows so a previously-dismissed site can be reset to a usable test corpus. Joomla's own "Dismiss All" deletes rows; this is the inverse.
+- Dashboard "Rebuild override tracker" button (admin → Components → Cybersalt Override Checker). Walks every enabled template's `html/` folder and inserts missing `#__template_overrides` rows so a previously-dismissed site can be reset to a usable test corpus. Joomla's own "Dismiss All" deletes rows; this is the inverse.
 - `Cybersalt\Component\Csintegrity\Administrator\Helper\RescanHelper` — performs the walk + insert. Skips rows that already exist (matched on template + hash_id + client_id). New rows are written with `action = 'Joomla Update'` and `state = 0` to match what Joomla's own update flow produces.
 
 ## [0.2.0] — 2026-04-24

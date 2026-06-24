@@ -250,7 +250,7 @@ final class ScanRunnerHelper
         what they need to do, not how the tool works.
 
         The user is reading your report inside the Joomla admin, on
-        the session detail page of the Cybersalt Template Integrity
+        the session detail page of the Cybersalt Override Checker
         component. That page has a chat box that calls you back with
         tool-use access (apply_fix, dismiss_override, list_remaining_overrides,
         get_override_file, get_core_file). So when a finding needs a
@@ -418,6 +418,6 @@ final class ScanRunnerHelper
             . "**What you should do today:** Nothing — every flagged override row points at a file that no longer exists on disk.\n\n"
             . "**What I checked:** $totalAvailable override row(s); $skipped of them couldn't be matched to a file on disk and were skipped.\n\n"
             . "**Findings table:** *(none)*\n\n"
-            . "**Technical detail:** The override-tracker rows are stale. Open *Components → Cybersalt Template Integrity → Action log* and run *Reset overrides for review* if you want the tracker rebuilt against the current filesystem.";
+            . "**Technical detail:** The override-tracker rows are stale. Open *Components → Cybersalt Override Checker → Action log* and run *Reset overrides for review* if you want the tracker rebuilt against the current filesystem.";
     }
 }

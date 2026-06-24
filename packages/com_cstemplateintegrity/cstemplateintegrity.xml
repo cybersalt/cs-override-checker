@@ -7,7 +7,7 @@
     <license>GNU General Public License version 2 or later</license>
     <authorEmail>support@cybersalt.com</authorEmail>
     <authorUrl>https://cybersalt.com</authorUrl>
-    <version>2.4.3</version>
+    <version>2.4.4</version>
     <description>COM_CSTEMPLATEINTEGRITY_XML_DESCRIPTION</description>
 
     <targetplatform name="joomla" version="5\.[0-9]+|6\.[0-9]+" />

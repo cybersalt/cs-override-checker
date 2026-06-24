@@ -1,4 +1,4 @@
-# Cybersalt Template Integrity
+# Cybersalt Override Checker
 
 A Joomla 5/6 integrity monitor that pairs with Claude to review every flagged template override on your site, and apply the patches you confirm — auto-backed-up, reversible, no SFTP needed.
 
@@ -70,7 +70,7 @@ Auth on every request: `X-Joomla-Token: <token>` + `Accept: application/vnd.api+
 
 ### Security
 
-Every endpoint is gated by ACL actions defined in `admin/access.xml` (`cstemplateintegrity.view` for reads, `cstemplateintegrity.write` for mutations). Until an admin grants those actions to a group in **System → Permissions → Cybersalt Template Integrity**, only Super Users can use the extension. Path-traversal containment is separator-anchored; the v2.2 hardening replaced the PHP-extension blocklist with a positive allow-list — every write must terminate inside `templates/<tpl>/html/` or `administrator/templates/<tpl>/html/` regardless of file extension. `opcache_invalidate()` runs after every PHP write so patches take effect on the next request. v2.2 also added a 4 MB cap on apply-fix / restore writes, a per-user 12-scans-per-hour soft cap on automated scans, and switched the Anthropic key fingerprint to a hash so no chars of the key leak in diagnostics. Run the `security-review` skill before tagging any future release.
+Every endpoint is gated by ACL actions defined in `admin/access.xml` (`cstemplateintegrity.view` for reads, `cstemplateintegrity.write` for mutations). Until an admin grants those actions to a group in **System → Permissions → Cybersalt Override Checker**, only Super Users can use the extension. Path-traversal containment is separator-anchored; the v2.2 hardening replaced the PHP-extension blocklist with a positive allow-list — every write must terminate inside `templates/<tpl>/html/` or `administrator/templates/<tpl>/html/` regardless of file extension. `opcache_invalidate()` runs after every PHP write so patches take effect on the next request. v2.2 also added a 4 MB cap on apply-fix / restore writes, a per-user 12-scans-per-hour soft cap on automated scans, and switched the Anthropic key fingerprint to a hash so no chars of the key leak in diagnostics. Run the `security-review` skill before tagging any future release.
 
 ---
 
@@ -79,7 +79,7 @@ Every endpoint is gated by ACL actions defined in `admin/access.xml` (`cstemplat
 1. Download the latest `pkg_cstemplateintegrity_v*.zip` from [Releases](https://github.com/cybersalt/cs-template-integrity/releases).
 2. **Extensions → Manage → Install** in your Joomla admin, upload the zip.
 3. The package script auto-enables the Web Services plugin — no extra step.
-4. Open **Components → Cybersalt Template Integrity** for the dashboard, copy the prompt, and paste it into Claude.
+4. Open **Components → Cybersalt Override Checker** for the dashboard, copy the prompt, and paste it into Claude.
 
 Requires Joomla 5.0+ or Joomla 6.0+ (native to both), and PHP 8.1+.
 

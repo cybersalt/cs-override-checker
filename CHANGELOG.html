@@ -1,5 +1,24 @@
 <div class="changelog-container">
-    <h1>📋 Cybersalt Template Integrity — Changelog</h1>
+    <h1>📋 Cybersalt Override Checker — Changelog</h1>
+
+    <h2>
+        <span class="version-badge">v2.4.4</span>
+        <span class="date">2026-06-24</span>
+    </h2>
+    <p>JED-submission release. Two fixes spotted by JED Checker on the v2.4.3 package, both prep for the formal Joomla Extension Directory listing.</p>
+
+    <h3><span class="section-icon">🐞</span>Fixes</h3>
+    <ul>
+        <li><strong>Build script: package zip now ships every locale's <code>pkg_*.sys.ini</code>.</strong> The <code>&lt;languages&gt;</code> block in the package manifest declares all 15 locales but <code>build-package.ps1</code> was only copying <code>en-GB</code>'s package-level sys.ini into the staging root before zipping &mdash; Joomla's installer never complained (it falls back to en-GB) but JED Checker flagged 14 "File not found" entries. Build script now does a single <code>Copy-Item -Recurse</code> of the entire <code>language/</code> tree so every locale's sys.ini ends up in the zip.</li>
+    </ul>
+
+    <h3><span class="section-icon">🔧</span>Improvements</h3>
+    <ul>
+        <li><strong>Extension renamed: "Cybersalt Template Integrity" &rarr; "Cybersalt Override Checker".</strong> JED's naming policy bars the reserved word <em>Template</em> in extension names (alongside <em>Module</em>, <em>Plugin</em>, <em>Component</em>, etc.). <em>Override Checker</em> is more precise about what the extension actually monitors (template overrides) and keeps the brand half of the name. <strong>Cosmetic only:</strong> every internal identifier stays the same &mdash; <code>pkg_cstemplateintegrity</code>, <code>com_cstemplateintegrity</code>, <code>plg_webservices_cstemplateintegrity</code>, <code>plg_task_cstemplateintegrity</code>, the <code>Cybersalt\Component\Cstemplateintegrity\…</code> PHP namespaces, the <code>#__cstemplateintegrity_*</code> database tables, the GitHub repo <code>cs-template-integrity</code>, and the update-server URL (<code>element=pkg_cstemplateintegrity</code>) all remain untouched. Existing installs upgrade in place with no migration. 387 substring replacements across 102 files.</li>
+    </ul>
+
+    <h3>Migration</h3>
+    <p>In-place upgrade from 2.4.3. No schema changes; no settings changes; no data migration. The first time the admin opens the component after the upgrade, they'll see <em>"Override Checker"</em> in the Components menu where <em>"Template Integrity"</em> used to be. Nothing else changes.</p>
 
     <h2>
         <span class="version-badge">v2.4.3</span>
@@ -32,7 +51,7 @@
 
     <h3><span class="section-icon">🔧</span>Improvements</h3>
     <ul>
-        <li><strong>Components menu label shortened to "Template Integrity"</strong> (from "Cybersalt Template Integrity"). Applied to all 15 locale INI / SYS.INI files. The extension's full name and branding are unchanged everywhere else.</li>
+        <li><strong>Components menu label shortened to "Override Checker"</strong> (from "Cybersalt Override Checker"). Applied to all 15 locale INI / SYS.INI files. The extension's full name and branding are unchanged everywhere else.</li>
         <li><strong>Method 1 (manual) &mdash; Step 1 copy rewritten.</strong> Step 1 now explains that the Joomla API token can be saved into the component's <em>Options &rarr; Keys &amp; tokens</em> tab, and the dashboard prompt will then auto-fill with it on every scan. Users who'd rather not save the token still see the same single-paste instruction.</li>
         <li><strong>Method 1 &mdash; Step 2 placeholder-replace is now conditional.</strong> Step 2 tells users to replace the <code>&lt;PASTE YOUR JOOMLA API TOKEN HERE&gt;</code> placeholder <em>only if they did not save the token in Step 1</em>. A new paragraph recommends Claude Code over the browser, because at lower Claude plan tiers the review can take long enough that <em>claude.ai</em> in a browser hits its request timeout before Claude finishes responding.</li>
         <li><strong>Method 2 (automated) &mdash; no-key copy now points at the Options button on the card</strong> (was "in the toolbar above"), names the correct fieldset (<em>Keys &amp; tokens</em>, not <em>AI provider</em>), and explicitly reassures users that the key stays in their own site's database.</li>
@@ -195,7 +214,7 @@
                 <li><strong>East Asian:</strong> ja-JP (Japanese), zh-CN (Simplified Chinese)</li>
             </ul>
         </li>
-        <li>All translations use the formal admin-tool register appropriate to each language. Brand names (<em>Cybersalt Template Integrity</em>, <em>Anthropic</em>, <em>Claude</em>, <em>Joomla</em>, <em>Akeeba Backup</em>), technical acronyms (API, REST, XSS, SQL, CSRF, JSON, HTTP, PHP), code references (<code>#__template_overrides</code>, <code>JPATH_ROOT</code>, <code>sk-ant-…</code>, file paths, class names), URLs, and printf placeholders (<code>%s</code>, <code>%d</code>, <code>%1$d</code>) are preserved untranslated per Joomla extension convention.</li>
+        <li>All translations use the formal admin-tool register appropriate to each language. Brand names (<em>Cybersalt Override Checker</em>, <em>Anthropic</em>, <em>Claude</em>, <em>Joomla</em>, <em>Akeeba Backup</em>), technical acronyms (API, REST, XSS, SQL, CSRF, JSON, HTTP, PHP), code references (<code>#__template_overrides</code>, <code>JPATH_ROOT</code>, <code>sk-ant-…</code>, file paths, class names), URLs, and printf placeholders (<code>%s</code>, <code>%d</code>, <code>%1$d</code>) are preserved untranslated per Joomla extension convention.</li>
     </ul>
     <h3><span class="section-icon">🔧</span>Improvements</h3>
     <ul>
@@ -216,7 +235,7 @@
         <li><strong>Other 13 languages</strong> &mdash; language directories registered with English fallback content (so the language pack installs cleanly and Joomla resolves to English wherever a translation isn't yet shipped). Real translations rolling out in 2.3.x patch releases.</li>
     </ul>
     <h3>Migration</h3>
-    <p>In-place upgrade from 2.2.x. No schema changes; no settings changes. After install, an admin user whose Joomla language is set to <code>de-DE</code> will see Cybersalt Template Integrity in German throughout. Other configured languages will continue to display English admin copy until their patch release lands.</p>
+    <p>In-place upgrade from 2.2.x. No schema changes; no settings changes. After install, an admin user whose Joomla language is set to <code>de-DE</code> will see Cybersalt Override Checker in German throughout. Other configured languages will continue to display English admin copy until their patch release lands.</p>
 
     <h2>
         <span class="version-badge">v2.2.0</span>
@@ -238,7 +257,7 @@
         <li><strong>Cybersalt action-button palette.</strong> Method 1 uses <code>#dc6b1a</code> Cybersalt orange with white text; Method 2 (with API key) uses Bootstrap blue. Navigation buttons (Sessions / File backups / Site Templates Management / Action log) are neutral grey &mdash; "go fetch data" buttons, not primary actions.</li>
         <li><strong>Top nav reordered alphabetically</strong> &mdash; Action log &rarr; File backups &rarr; Open Site Templates Management &rarr; Sessions &rarr; Rescan &rarr; Diagnostics. Site Templates Management opens in a new tab.</li>
         <li><strong>Side-menu reorder</strong> &mdash; Dashboard &rarr; Action log &rarr; File backups &rarr; Sessions inside the component admin sidebar.</li>
-        <li><strong>Brand pass.</strong> Every user-facing page title now reads <em>Cybersalt Template Integrity</em> (was <em>CS Template Integrity</em>) &mdash; Sessions / Action log / File backups / extension manager / API component label / update server name. Code-side identifiers (namespaces, language string keys, file paths, DB tables) keep the <code>cs</code> short form.</li>
+        <li><strong>Brand pass.</strong> Every user-facing page title now reads <em>Cybersalt Override Checker</em> (was <em>CS Override Checker</em>) &mdash; Sessions / Action log / File backups / extension manager / API component label / update server name. Code-side identifiers (namespaces, language string keys, file paths, DB tables) keep the <code>cs</code> short form.</li>
         <li><strong>Get token link</strong> lands on the current admin's user-edit form (<code>view=user&amp;layout=edit&amp;id={current admin}</code>) instead of falling through to the user list. Route URLs are single-encoded (no more double <code>&amp;amp;amp;</code> in the rendered href).</li>
         <li><strong>Dark-mode prompt cards</strong> are slightly elevated so the card edge reads as a real container instead of blending into the page background. Light mode unchanged.</li>
     </ul>
@@ -273,7 +292,7 @@
     </h2>
     <h3><span class="section-icon">🚀</span>New</h3>
     <ul>
-        <li><strong>Choose your Claude model</strong> for the automated workflow. Two new dropdowns under <em>Components &rarr; CS Template Integrity &rarr; Options &rarr; AI provider</em>:
+        <li><strong>Choose your Claude model</strong> for the automated workflow. Two new dropdowns under <em>Components &rarr; CS Override Checker &rarr; Options &rarr; AI provider</em>:
             <ul>
                 <li><strong>Scan model</strong> &mdash; for the one-shot <em>Run automated scan</em>. Default Sonnet 4.6. Haiku cuts cost ~3&times; with no real quality loss on classification; Opus is overkill for routine scans but useful for security-sensitive sites.</li>
                 <li><strong>Chat model</strong> &mdash; for the tool-use loop. Default Sonnet 4.6 &mdash; tool use is harder than classification, so even if you go Haiku for scan, stay on Sonnet here.</li>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Cybersalt Template Integrity - ACL definitions
+    Cybersalt Override Checker - ACL definitions
 
     cstemplateintegrity.view  : may read overrides, sessions, action log, backups (GET endpoints)
     cstemplateintegrity.write : may apply fixes, dismiss overrides, restore backups, create sessions/backups

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension type="package" method="upgrade">
-    <name>Cybersalt Template Integrity</name>
+    <name>Cybersalt Override Checker</name>
     <author>Cybersalt</author>
     <creationDate>April 2026</creationDate>
     <packagename>cstemplateintegrity</packagename>
@@ -8,7 +8,7 @@
     <license>GNU General Public License version 2 or later</license>
     <authorEmail>support@cybersalt.com</authorEmail>
     <authorUrl>https://cybersalt.com</authorUrl>
-    <version>2.4.3</version>
+    <version>2.4.4</version>
     <url>https://github.com/cybersalt/cs-template-integrity</url>
     <packager>Cybersalt</packager>
     <packagerurl>https://cybersalt.com</packagerurl>
@@ -18,7 +18,7 @@
 
     <changelogurl>https://raw.githubusercontent.com/cybersalt/cs-template-integrity/main/changelog.xml</changelogurl>
     <updateservers>
-        <server type="extension" name="Cybersalt Template Integrity Updates">https://www.cybersalt.com/index.php?option=com_csreleasemanager&amp;task=api.updatexml&amp;format=raw&amp;element=pkg_cstemplateintegrity</server>
+        <server type="extension" name="Cybersalt Override Checker Updates">https://www.cybersalt.com/index.php?option=com_csreleasemanager&amp;task=api.updatexml&amp;format=raw&amp;element=pkg_cstemplateintegrity</server>
     </updateservers>
 
     <scriptfile>script.php</scriptfile>

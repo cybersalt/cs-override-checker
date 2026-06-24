@@ -94,7 +94,6 @@ $pkgStage = Join-Path $scriptDir "build"
 if (Test-Path $pkgStage) { Remove-Item $pkgStage -Recurse -Force }
 New-Item -ItemType Directory -Path $pkgStage | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $pkgStage "packages") | Out-Null
-New-Item -ItemType Directory -Path (Join-Path $pkgStage "language\en-GB") | Out-Null
 
 Write-Host "Building pkg_cstemplateintegrity v$Version ..." -ForegroundColor Cyan
 
@@ -135,7 +134,12 @@ foreach ($ext in $childExtensions) {
 # 2. Copy the package manifest, script, and language files into the staging root.
 Copy-Item $pkgManifest (Join-Path $pkgStage "pkg_cstemplateintegrity.xml")
 Copy-Item (Join-Path $pkgDir "script.php") (Join-Path $pkgStage "script.php")
-Copy-Item (Join-Path $pkgDir "language\en-GB\pkg_cstemplateintegrity.sys.ini") (Join-Path $pkgStage "language\en-GB\pkg_cstemplateintegrity.sys.ini")
+# Recursive copy of the entire language/ tree so every locale's
+# pkg_cstemplateintegrity.sys.ini ends up in the zip. The manifest's
+# <languages> block declares 15 locales; up through v2.4.3 only en-GB was
+# being copied, which JED Checker flagged as "File not found" for the
+# other 14 entries.
+Copy-Item -Path (Join-Path $pkgDir "language") -Destination $pkgStage -Recurse
 
 # 3. Zip the whole package.
 Push-Location $pkgStage

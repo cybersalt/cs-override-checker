@@ -19,6 +19,18 @@
     <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
+        <version>2.4.4</version>
+        <fix>
+            <item>Build script now recursively copies the entire language/ tree into the package zip, so all 15 locales' pkg_cstemplateintegrity.sys.ini files ship — not just en-GB. Spotted by JED Checker on v2.4.3.</item>
+        </fix>
+        <change>
+            <item>Extension renamed from "Cybersalt Template Integrity" to "Cybersalt Override Checker" — JED's naming policy bars the reserved word "Template" in extension names. Cosmetic only: all internal identifiers (pkg_cstemplateintegrity element id, PHP namespaces, #__cstemplateintegrity_* tables, repo name, update-server URL) remain unchanged. Existing installs upgrade in place with no migration.</item>
+        </change>
+    </changelog>
+
+    <changelog>
+        <element>pkg_cstemplateintegrity</element>
+        <type>package</type>
         <version>2.4.3</version>
         <addition>
             <item>Auto-scan report now produces the same "Suggested next-turn prompts" the manual workflow has had since v2.3.4 — three prompts when the batch covered everything, four when more overrides remain (the extra "Continue with the next batch" prompt sits at the top; prompts 2 and 3 pick up a "then check the next batch" tail). Real finding ids are substituted into each prompt; never placeholders.</item>
@@ -36,7 +48,7 @@
         <type>package</type>
         <version>2.4.2</version>
         <change>
-            <item>Components-menu label shortened from "Cybersalt Template Integrity" to "Template Integrity" across all 15 locales.</item>
+            <item>Components-menu label shortened from "Cybersalt Override Checker" to "Override Checker" across all 15 locales.</item>
             <item>Method 1 (manual workflow) — Step 1 dashboard copy now explains that the Joomla API token can be saved in Options → Keys &amp; tokens, and the dashboard prompt will auto-fill with it. Step 2 now makes the placeholder-replace step conditional on whether the user saved the token, and adds a new recommendation to run the manual scan in Claude Code rather than claude.ai because lower plan tiers can take longer than the browser request timeout.</item>
             <item>Method 2 (automated workflow) — no-key copy now points at the Options button on the card (rather than the admin toolbar), names the correct fieldset, and explicitly notes the key stays in the site's own database. All 14 non-en-GB locales updated to match the en-GB rewrites.</item>
         </change>
@@ -167,7 +179,7 @@
             <item>Cybersalt orange (#dc6b1a) + Bootstrap blue palette for the two action shortcut buttons. Navigation buttons neutral grey.</item>
             <item>Top nav reordered alphabetically. Site Templates Management opens in a new tab so the dashboard stays open behind it.</item>
             <item>Side menu reordered: Dashboard → Action log → File backups → Sessions.</item>
-            <item>Brand pass: every user-facing page title now reads "Cybersalt Template Integrity" (was "CS Template Integrity"). Code-side identifiers keep the cs short form.</item>
+            <item>Brand pass: every user-facing page title now reads "Cybersalt Override Checker" (was "CS Override Checker"). Code-side identifiers keep the cs short form.</item>
             <item>Options tab renamed: "AI provider" → "Keys &amp; tokens".</item>
         </change>
         <security>

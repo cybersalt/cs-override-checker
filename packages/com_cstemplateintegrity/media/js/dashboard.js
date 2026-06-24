@@ -1,5 +1,5 @@
 /**
- * Cybersalt Template Integrity — dashboard behaviour
+ * Cybersalt Override Checker — dashboard behaviour
  *
  * Wires up the "Copy prompt" button. No-op if either the button or
  * the prompt block is missing (e.g. on a future view that reuses the

@@ -1,5 +1,5 @@
 --
--- Cybersalt Template Integrity -- install schema
+-- Cybersalt Override Checker -- install schema
 -- Three tables created on first install. The component reads
 -- Joomla's #__template_overrides table for its primary data; these
 -- tables capture our own session log, action log, and pre-change

@@ -1,5 +1,5 @@
 --
--- Cybersalt Template Integrity — uninstall
+-- Cybersalt Override Checker — uninstall
 --
 
 DROP TABLE IF EXISTS `#__cstemplateintegrity_backups`;
