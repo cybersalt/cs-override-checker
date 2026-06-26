@@ -85,6 +85,6 @@ This fieldwork feeds directly into the existing sprint outline in [README.md](..
 
 ## Reference
 
-- Vault project note: `01.projects/cs-template-integrity.md` section 14 has the longer-form write-up with Tim's inline commentary. This doc is a condensed, source-of-truth-for-implementation version.
+- Vault project note: `01.projects/cs-override-checker.md` section 14 has the longer-form write-up with Tim's inline commentary. This doc is a condensed, source-of-truth-for-implementation version.
 - Rocky's client note (credentials, relationship context): `03.team/clients/Rocky-Wall-Fairview.md` in Tim's vault.
 - Session log for the 2026-04-24 REST probe and browser-Claude inspection: recorded in the daily note.

@@ -1,6 +1,6 @@
 # Classifier patterns — v1 ruleset
 
-The classifier is the value add of `cs-template-integrity`. It takes a flagged override (path + override contents + core contents + diff) and emits a verdict: **auto-pass** / **flag for review** / **alert**.
+The classifier is the value add of `cs-override-checker`. It takes a flagged override (path + override contents + core contents + diff) and emits a verdict: **auto-pass** / **flag for review** / **alert**.
 
 v1 ruleset is data-driven — a YAML or PHP array consumed by `lib_csintegrity\Classifier`. New patterns can be added without code changes.
 

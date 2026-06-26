@@ -3,14 +3,14 @@
     <update>
         <name>Cybersalt Override Checker</name>
         <description>Template-override security review for Joomla, paired with Claude.</description>
-        <element>pkg_cstemplateintegrity</element>
+        <element>pkg_csoverridechecker</element>
         <type>package</type>
-        <version>2.4.4</version>
-        <infourl title="Cybersalt Override Checker">https://github.com/cybersalt/cs-template-integrity</infourl>
+        <version>2.5.0</version>
+        <infourl title="Cybersalt Override Checker">https://github.com/cybersalt/cs-override-checker</infourl>
         <downloads>
-            <downloadurl type="full" format="zip">https://github.com/cybersalt/cs-template-integrity/releases/download/v2.4.4/pkg_cstemplateintegrity_v2.4.4.zip</downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/cybersalt/cs-override-checker/releases/download/v2.5.0/pkg_csoverridechecker_v2.5.0.zip</downloadurl>
         </downloads>
-        <sha256>ffc91eab470928e25cb430687f6378cad50d7f3ac8e89097d7ca5bdda79506b9</sha256>
+        <sha256>4de99b5087234594482d5281a869016678a844b2520f1c856b44279d71dd2663</sha256>
         <tags>
             <tag>stable</tag>
         </tags>
@@ -18,6 +18,6 @@
         <maintainerurl>https://cybersalt.com</maintainerurl>
         <targetplatform name="joomla" version="5\.[0-9]+|6\.[0-9]+" />
         <php_minimum>8.3</php_minimum>
-        <changelogurl>https://raw.githubusercontent.com/cybersalt/cs-template-integrity/main/changelog.xml</changelogurl>
+        <changelogurl>https://raw.githubusercontent.com/cybersalt/cs-override-checker/main/changelog.xml</changelogurl>
     </update>
 </updates>

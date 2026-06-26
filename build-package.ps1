@@ -1,6 +1,6 @@
-# Build script for cs-template-integrity
+# Build script for cs-override-checker
 # Produces a single installable package at the repo root:
-#   pkg_cstemplateintegrity_v{version}_{YYYYMMDD}_{HHMM}.zip
+#   pkg_csoverridechecker_v{version}_{YYYYMMDD}_{HHMM}.zip
 # which wraps both the component and the webservices plugin. Install
 # this one zip; Joomla unpacks it and installs both child extensions.
 # The package's script.php auto-enables the webservices plugin on
@@ -46,8 +46,8 @@ if ($bomFiles.Count -gt 0) {
     throw "Strip the BOM and re-run. Set-Content -Encoding utf8 in Windows PowerShell 5.1 writes BOM by default. Use [System.IO.File]::WriteAllText with a UTF8Encoding(false), or pipe through `tail -c +4` from a unix shell to drop the leading 3 bytes."
 }
 
-$pkgDir         = Join-Path $scriptDir "packages\pkg_cstemplateintegrity"
-$pkgManifest    = Join-Path $pkgDir "pkg_cstemplateintegrity.xml"
+$pkgDir         = Join-Path $scriptDir "packages\pkg_csoverridechecker"
+$pkgManifest    = Join-Path $pkgDir "pkg_csoverridechecker.xml"
 
 if (-not (Test-Path $pkgManifest)) {
     throw "Package manifest not found at $pkgManifest"
@@ -64,38 +64,38 @@ if ([string]::IsNullOrEmpty($Version)) {
 
 $childExtensions = @(
     @{
-        Name      = "com_cstemplateintegrity"
-        SourceDir = Join-Path $scriptDir "packages\com_cstemplateintegrity"
-        Contents  = @("cstemplateintegrity.xml", "script.php", "admin", "api", "media")
+        Name      = "com_csoverridechecker"
+        SourceDir = Join-Path $scriptDir "packages\com_csoverridechecker"
+        Contents  = @("csoverridechecker.xml", "script.php", "admin", "api", "media")
     },
     @{
-        Name      = "plg_webservices_cstemplateintegrity"
-        SourceDir = Join-Path $scriptDir "packages\plg_webservices_cstemplateintegrity"
-        Contents  = @("cstemplateintegrity.xml", "services", "src", "language")
+        Name      = "plg_webservices_csoverridechecker"
+        SourceDir = Join-Path $scriptDir "packages\plg_webservices_csoverridechecker"
+        Contents  = @("csoverridechecker.xml", "services", "src", "language")
     },
     @{
-        Name      = "plg_task_cstemplateintegrity"
-        SourceDir = Join-Path $scriptDir "packages\plg_task_cstemplateintegrity"
-        Contents  = @("cstemplateintegrity.xml", "services", "src", "forms", "language")
+        Name      = "plg_task_csoverridechecker"
+        SourceDir = Join-Path $scriptDir "packages\plg_task_csoverridechecker"
+        Contents  = @("csoverridechecker.xml", "services", "src", "forms", "language")
     }
 )
 
 $timestamp   = Get-Date -Format "yyyyMMdd_HHmm"
-$pkgZipName  = "pkg_cstemplateintegrity_v${Version}_${timestamp}.zip"
+$pkgZipName  = "pkg_csoverridechecker_v${Version}_${timestamp}.zip"
 $pkgZipPath  = Join-Path $scriptDir $pkgZipName
 
 # Clean old builds
-Get-ChildItem -Path $scriptDir -Filter "pkg_cstemplateintegrity_v${Version}*.zip" | Remove-Item -Force
-Get-ChildItem -Path $scriptDir -Filter "com_cstemplateintegrity_v${Version}*.zip" | Remove-Item -Force
-Get-ChildItem -Path $scriptDir -Filter "plg_webservices_cstemplateintegrity_v${Version}*.zip" | Remove-Item -Force
-Get-ChildItem -Path $scriptDir -Filter "plg_task_cstemplateintegrity_v${Version}*.zip" | Remove-Item -Force
+Get-ChildItem -Path $scriptDir -Filter "pkg_csoverridechecker_v${Version}*.zip" | Remove-Item -Force
+Get-ChildItem -Path $scriptDir -Filter "com_csoverridechecker_v${Version}*.zip" | Remove-Item -Force
+Get-ChildItem -Path $scriptDir -Filter "plg_webservices_csoverridechecker_v${Version}*.zip" | Remove-Item -Force
+Get-ChildItem -Path $scriptDir -Filter "plg_task_csoverridechecker_v${Version}*.zip" | Remove-Item -Force
 
 $pkgStage = Join-Path $scriptDir "build"
 if (Test-Path $pkgStage) { Remove-Item $pkgStage -Recurse -Force }
 New-Item -ItemType Directory -Path $pkgStage | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $pkgStage "packages") | Out-Null
 
-Write-Host "Building pkg_cstemplateintegrity v$Version ..." -ForegroundColor Cyan
+Write-Host "Building pkg_csoverridechecker v$Version ..." -ForegroundColor Cyan
 
 # 1. Build each child extension into the staging packages/ folder with
 #    a stable, non-timestamped filename.
@@ -132,10 +132,10 @@ foreach ($ext in $childExtensions) {
 }
 
 # 2. Copy the package manifest, script, and language files into the staging root.
-Copy-Item $pkgManifest (Join-Path $pkgStage "pkg_cstemplateintegrity.xml")
+Copy-Item $pkgManifest (Join-Path $pkgStage "pkg_csoverridechecker.xml")
 Copy-Item (Join-Path $pkgDir "script.php") (Join-Path $pkgStage "script.php")
 # Recursive copy of the entire language/ tree so every locale's
-# pkg_cstemplateintegrity.sys.ini ends up in the zip. The manifest's
+# pkg_csoverridechecker.sys.ini ends up in the zip. The manifest's
 # <languages> block declares 15 locales; up through v2.4.3 only en-GB was
 # being copied, which JED Checker flagged as "File not found" for the
 # other 14 entries.

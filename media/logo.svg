@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Cobalt template frame: header bar + main content box + sidebar lines -->
+  <g stroke="#0102E1">
+    <path d="M4 4m0 1a1 1 0 0 1 1 -1h14a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-14a1 1 0 0 1 -1 -1z" />
+    <path d="M4 12m0 1a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-6a1 1 0 0 1 -1 -1z" />
+    <path d="M14 12l6 0" />
+    <path d="M14 16l6 0" />
+    <path d="M14 20l6 0" />
+  </g>
+  <!-- White knockout behind shield-check badge for clean overlap -->
+  <circle cx="18" cy="4" r="3.8" fill="#ffffff" stroke="#ffffff" stroke-width="1" />
+  <!-- Orange shield-check corner badge: integrity verified -->
+  <path d="M18 1.2 L15.5 2.8 L15.5 4 C15.5 5.5 16.5 6.5 18 7 C19.5 6.5 20.5 5.5 20.5 4 L20.5 2.8 Z" stroke="#FE9904" stroke-width="1.4" fill="#FE9904" fill-opacity="0.18" stroke-linejoin="round" />
+  <path d="M16.7 4 L17.7 4.9 L19.4 3.2" stroke="#FE9904" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>

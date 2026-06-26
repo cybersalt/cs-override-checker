@@ -17,6 +17,22 @@
 <changelogs>
 
     <changelog>
+        <element>pkg_csoverridechecker</element>
+        <type>package</type>
+        <version>2.5.0</version>
+        <change>
+            <item>Internal identifier rename: every "cstemplateintegrity" symbol — element ids, PHP namespaces, database tables, language keys, scheduler task type, Web Services API route, file and folder names — is now "csoverridechecker". Aligns the internals with the public name (renamed in v2.4.4). 168 files modified, 99 files renamed, 6 directories renamed.</item>
+            <item>Web Services API URL changed: the Overrides endpoint moves from /api/index.php/v1/cstemplateintegrity/overrides to /api/index.php/v1/csoverridechecker/overrides. There is no compat alias — any external client configured against the old URL must be updated.</item>
+        </change>
+        <addition>
+            <item>One-shot migration script in the package installer: detects an existing pkg_cstemplateintegrity install and copies extension params (API key, model selection, cost caps), data tables (sessions, actions, backups) and scheduler-task rows into the new pkg_csoverridechecker schema. Idempotent — runs only on first install, only if legacy package is detected, only if new tables are empty. After migration the postinstall card explains the rename and offers a one-click link to the Extensions Manager filtered to the old package, ready to be uninstalled.</item>
+        </addition>
+        <note>
+            <item>The old package's update feed is frozen at v2.4.4 — existing sites will not see v2.5.0 in their Joomla update list. Install pkg_csoverridechecker_v2.5.0.zip manually (from the JED listing or the GitHub release) and the migration runs automatically.</item>
+        </note>
+    </changelog>
+
+    <changelog>
         <element>pkg_cstemplateintegrity</element>
         <type>package</type>
         <version>2.4.4</version>

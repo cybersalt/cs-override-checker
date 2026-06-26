@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension type="plugin" group="task" method="upgrade">
+    <name>plg_task_csoverridechecker</name>
+    <author>Cybersalt</author>
+    <creationDate>May 2026</creationDate>
+    <copyright>Copyright (C) 2026 Cybersalt. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later</license>
+    <authorEmail>support@cybersalt.com</authorEmail>
+    <authorUrl>https://cybersalt.com</authorUrl>
+    <version>2.5.0</version>
+    <description>PLG_TASK_CSOVERRIDECHECKER_XML_DESCRIPTION</description>
+
+    <targetplatform name="joomla" version="5\.[0-9]+|6\.[0-9]+" />
+
+    <namespace path="src">Cybersalt\Plugin\Task\Csoverridechecker</namespace>
+
+    <files>
+        <folder plugin="csoverridechecker">services</folder>
+        <folder>forms</folder>
+        <folder>src</folder>
+    </files>
+
+    <languages>
+        <language tag="en-GB">language/en-GB/plg_task_csoverridechecker.ini</language>
+        <language tag="en-GB">language/en-GB/plg_task_csoverridechecker.sys.ini</language>
+    </languages>
+</extension>

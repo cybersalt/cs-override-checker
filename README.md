@@ -4,12 +4,12 @@ A Joomla 5/6 integrity monitor that pairs with Claude to review every flagged te
 
 ## 📥 Download
 
-**[➡ Download the latest release (always points at the newest version)](https://github.com/cybersalt/cs-template-integrity/releases/latest)**
+**[➡ Download the latest release (always points at the newest version)](https://github.com/cybersalt/cs-override-checker/releases/latest)**
 
 Or grab a specific version directly:
 
-- Always-latest zip: <https://github.com/cybersalt/cs-template-integrity/releases/latest>
-- Browse all versions: <https://github.com/cybersalt/cs-template-integrity/releases>
+- Always-latest zip: <https://github.com/cybersalt/cs-override-checker/releases/latest>
+- Browse all versions: <https://github.com/cybersalt/cs-override-checker/releases>
 
 Once installed, future versions show up under **System → Manage → Update** in your Joomla admin — no need to re-download.
 
@@ -30,7 +30,7 @@ This extension is template-literate. It pairs your site with Claude to do the wo
 
 **Two ways to run it.** The manual workflow ships with the extension since v1.0: copy a prompt from the dashboard, paste into Claude, Claude calls back to the site's Web Services API to read overrides and apply fixes. **v2.0 added the automated workflow**: save your Anthropic API key in Options, click *Run automated scan*, and the extension drives the whole review server-side — no copy-paste, no second window. Once Claude has produced the report, a chat box on the session detail view lets you ask for actions (*"fix #1 and #3, dismiss the cosmetic ones"*) and Claude applies them via tool calls without you leaving the Joomla admin.
 
-For per-version details, see the full [CHANGELOG.md](CHANGELOG.md). The most recent release is always at the [Releases page](https://github.com/cybersalt/cs-template-integrity/releases/latest).
+For per-version details, see the full [CHANGELOG.md](CHANGELOG.md). The most recent release is always at the [Releases page](https://github.com/cybersalt/cs-override-checker/releases/latest).
 
 ---
 
@@ -38,10 +38,10 @@ For per-version details, see the full [CHANGELOG.md](CHANGELOG.md). The most rec
 
 | Extension | Role |
 |---|---|
-| `com_cstemplateintegrity` | Admin component — dashboard, sessions log, action log, file backups (with restore), Diagnostics modal, Run automated scan, chat-with-Claude on the session detail view, Options dialog (Anthropic API key + model selection + Joomla API token), Web Services API endpoints |
-| `plg_webservices_cstemplateintegrity` | Registers the `/api/index.php/v1/cstemplateintegrity/...` routes for the component. Auto-enabled by the package installer. |
+| `com_csoverridechecker` | Admin component — dashboard, sessions log, action log, file backups (with restore), Diagnostics modal, Run automated scan, chat-with-Claude on the session detail view, Options dialog (Anthropic API key + model selection + Joomla API token), Web Services API endpoints |
+| `plg_webservices_csoverridechecker` | Registers the `/api/index.php/v1/csoverridechecker/...` routes for the component. Auto-enabled by the package installer. |
 
-Shipped together as `pkg_cstemplateintegrity`.
+Shipped together as `pkg_csoverridechecker`.
 
 **Multilingual since v2.3.** UI ships in 15 languages: en-GB, de-DE, fr-FR, es-ES, it-IT, pt-BR, nl-NL, ru-RU, pl-PL, ja-JP, zh-CN, tr-TR, el-GR, cs-CZ, sv-SE. Joomla picks the active language automatically based on the admin user's profile.
 
@@ -56,27 +56,27 @@ Shipped together as `pkg_cstemplateintegrity`.
 Auth on every request: `X-Joomla-Token: <token>` + `Accept: application/vnd.api+json`. (NOT `Authorization: Bearer` — Joomla rejects that.)
 
 **Read:**
-- `GET /v1/cstemplateintegrity/overrides` — list flagged overrides
-- `GET /v1/cstemplateintegrity/overrides/{id}/override-file` — override contents
-- `GET /v1/cstemplateintegrity/overrides/{id}/core-file` — stock core file the override is shadowing
-- `GET /v1/cstemplateintegrity/sessions/{id}` — fetch a previous review report
+- `GET /v1/csoverridechecker/overrides` — list flagged overrides
+- `GET /v1/csoverridechecker/overrides/{id}/override-file` — override contents
+- `GET /v1/csoverridechecker/overrides/{id}/core-file` — stock core file the override is shadowing
+- `GET /v1/csoverridechecker/sessions/{id}` — fetch a previous review report
 
 **Write:**
-- `POST /v1/cstemplateintegrity/overrides/{id}/apply-fix` — patch the override file in place; auto-snapshots first
-- `POST /v1/cstemplateintegrity/overrides/{id}/dismiss` — clear one tracker row
-- `POST /v1/cstemplateintegrity/overrides/dismiss-all` — clear every remaining row
-- `POST /v1/cstemplateintegrity/sessions` — save a review report
-- `POST /v1/cstemplateintegrity/backups/{id}/restore` — roll back any patch
+- `POST /v1/csoverridechecker/overrides/{id}/apply-fix` — patch the override file in place; auto-snapshots first
+- `POST /v1/csoverridechecker/overrides/{id}/dismiss` — clear one tracker row
+- `POST /v1/csoverridechecker/overrides/dismiss-all` — clear every remaining row
+- `POST /v1/csoverridechecker/sessions` — save a review report
+- `POST /v1/csoverridechecker/backups/{id}/restore` — roll back any patch
 
 ### Security
 
-Every endpoint is gated by ACL actions defined in `admin/access.xml` (`cstemplateintegrity.view` for reads, `cstemplateintegrity.write` for mutations). Until an admin grants those actions to a group in **System → Permissions → Cybersalt Override Checker**, only Super Users can use the extension. Path-traversal containment is separator-anchored; the v2.2 hardening replaced the PHP-extension blocklist with a positive allow-list — every write must terminate inside `templates/<tpl>/html/` or `administrator/templates/<tpl>/html/` regardless of file extension. `opcache_invalidate()` runs after every PHP write so patches take effect on the next request. v2.2 also added a 4 MB cap on apply-fix / restore writes, a per-user 12-scans-per-hour soft cap on automated scans, and switched the Anthropic key fingerprint to a hash so no chars of the key leak in diagnostics. Run the `security-review` skill before tagging any future release.
+Every endpoint is gated by ACL actions defined in `admin/access.xml` (`csoverridechecker.view` for reads, `csoverridechecker.write` for mutations). Until an admin grants those actions to a group in **System → Permissions → Cybersalt Override Checker**, only Super Users can use the extension. Path-traversal containment is separator-anchored; the v2.2 hardening replaced the PHP-extension blocklist with a positive allow-list — every write must terminate inside `templates/<tpl>/html/` or `administrator/templates/<tpl>/html/` regardless of file extension. `opcache_invalidate()` runs after every PHP write so patches take effect on the next request. v2.2 also added a 4 MB cap on apply-fix / restore writes, a per-user 12-scans-per-hour soft cap on automated scans, and switched the Anthropic key fingerprint to a hash so no chars of the key leak in diagnostics. Run the `security-review` skill before tagging any future release.
 
 ---
 
 ## Install
 
-1. Download the latest `pkg_cstemplateintegrity_v*.zip` from [Releases](https://github.com/cybersalt/cs-template-integrity/releases).
+1. Download the latest `pkg_csoverridechecker_v*.zip` from [Releases](https://github.com/cybersalt/cs-override-checker/releases).
 2. **Extensions → Manage → Install** in your Joomla admin, upload the zip.
 3. The package script auto-enables the Web Services plugin — no extra step.
 4. Open **Components → Cybersalt Override Checker** for the dashboard, copy the prompt, and paste it into Claude.

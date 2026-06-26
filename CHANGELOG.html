@@ -2,6 +2,34 @@
     <h1>📋 Cybersalt Override Checker — Changelog</h1>
 
     <h2>
+        <span class="version-badge">v2.5.0</span>
+        <span class="date">2026-06-26</span>
+    </h2>
+    <p>Internal rename release. v2.4.4 fixed the user-visible name but every internal identifier (element id, namespace, table prefix, file paths) still referenced "templateintegrity". This release renames all of them and ships a one-shot migration script so existing v2.4.x installs upgrade cleanly without losing data.</p>
+
+    <h3><span class="section-icon">🔧</span>Improvements</h3>
+    <ul>
+        <li><strong>Internal identifier rename: <code>cstemplateintegrity</code> &rarr; <code>csoverridechecker</code> everywhere.</strong> Element ids (<code>pkg_csoverridechecker</code>, <code>com_csoverridechecker</code>, <code>plg_webservices_csoverridechecker</code>, <code>plg_task_csoverridechecker</code>), PHP namespaces (<code>Cybersalt\Component\Csoverridechecker\…</code>), database tables (<code>#__csoverridechecker_*</code>), language keys (<code>COM_CSOVERRIDECHECKER_*</code> etc.), scheduler task type (<code>csoverridechecker.purgeBackups</code>), Web Services API route (<code>/api/index.php/v1/csoverridechecker/overrides</code>), file and folder names &mdash; all aligned with the public display name. 168 files modified, 99 files renamed, 6 directories renamed.</li>
+        <li><strong>Web Services API URL changed.</strong> Overrides endpoint moves from <code>/api/index.php/v1/cstemplateintegrity/overrides</code> to <code>/api/index.php/v1/csoverridechecker/overrides</code>. Any Claude / MCP client configured against the old URL will need to be reconfigured. There is no compat alias.</li>
+    </ul>
+
+    <h3>Migration (automatic)</h3>
+    <p>The <code>pkg_csoverridechecker</code> installer detects an existing <code>pkg_cstemplateintegrity</code> install and runs a one-shot migration before showing the postinstall card:</p>
+    <ol>
+        <li>Copies extension params (API key, scan model, chat model, cost caps, etc.) from old component, webservices plugin, and task plugin to their new counterparts.</li>
+        <li>Copies all rows from <code>#__cstemplateintegrity_sessions</code>, <code>_actions</code>, and <code>_backups</code> into the new <code>#__csoverridechecker_*</code> tables.</li>
+        <li>Rewrites <code>#__scheduler_tasks</code> rows where <code>type='cstemplateintegrity.purgeBackups'</code> to the new task type, so the user's existing schedule continues to run on the new plugin.</li>
+        <li>Renders a one-time card on the install page explaining the rename and offering a one-click button to the Extensions Manager filtered for the legacy package, ready to be uninstalled.</li>
+    </ol>
+    <p>Idempotent: only runs on first install of <code>pkg_csoverridechecker</code> (not subsequent updates), only runs if the legacy extension is present, aborts if the new tables already contain data. After migration the legacy <code>pkg_cstemplateintegrity</code> package remains installed but inert until the user uninstalls it explicitly.</p>
+
+    <h3>Notes for users</h3>
+    <ul>
+        <li><strong>Old package's update feed is frozen at v2.4.4.</strong> Existing sites with the old package installed will not see v2.5.0 in their normal Joomla update list &mdash; there is no upgrade path from <code>pkg_cstemplateintegrity</code> to <code>pkg_csoverridechecker</code> through the update feed. Install <code>pkg_csoverridechecker_v2.5.0.zip</code> from the Joomla Extension Directory listing or the GitHub release; the migration runs automatically.</li>
+        <li><strong>Reconfigure any external clients.</strong> If you have Claude (or any other API consumer) configured against <code>/api/index.php/v1/cstemplateintegrity/overrides</code>, update it to <code>/api/index.php/v1/csoverridechecker/overrides</code>.</li>
+    </ul>
+
+    <h2>
         <span class="version-badge">v2.4.4</span>
         <span class="date">2026-06-24</span>
     </h2>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" method="upgrade">
+    <name>COM_CSOVERRIDECHECKER</name>
+    <author>Cybersalt</author>
+    <creationDate>April 2026</creationDate>
+    <copyright>Copyright (C) 2026 Cybersalt. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later</license>
+    <authorEmail>support@cybersalt.com</authorEmail>
+    <authorUrl>https://cybersalt.com</authorUrl>
+    <version>2.5.0</version>
+    <description>COM_CSOVERRIDECHECKER_XML_DESCRIPTION</description>
+
+    <targetplatform name="joomla" version="5\.[0-9]+|6\.[0-9]+" />
+
+    <namespace path="src">Cybersalt\Component\Csoverridechecker</namespace>
+
+    <scriptfile>script.php</scriptfile>
+
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+        </sql>
+    </install>
+    <uninstall>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/uninstall.mysql.utf8.sql</file>
+        </sql>
+    </uninstall>
+    <administration>
+        <menu img="class:check-circle" link="option=com_csoverridechecker&amp;view=dashboard">COM_CSOVERRIDECHECKER</menu>
+        <submenu>
+            <menu link="option=com_csoverridechecker&amp;view=dashboard">COM_CSOVERRIDECHECKER_SUBMENU_DASHBOARD</menu>
+            <menu link="option=com_csoverridechecker&amp;view=actions">COM_CSOVERRIDECHECKER_SUBMENU_ACTIONS</menu>
+            <menu link="option=com_csoverridechecker&amp;view=backups">COM_CSOVERRIDECHECKER_SUBMENU_BACKUPS</menu>
+            <menu link="option=com_csoverridechecker&amp;view=sessions">COM_CSOVERRIDECHECKER_SUBMENU_SESSIONS</menu>
+        </submenu>
+        <files folder="admin">
+            <filename>access.xml</filename>
+            <filename>config.xml</filename>
+            <folder>language</folder>
+            <folder>services</folder>
+            <folder>sql</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
+        </files>
+        <languages folder="admin/language">
+            <language tag="en-GB">en-GB/com_csoverridechecker.ini</language>
+            <language tag="en-GB">en-GB/com_csoverridechecker.sys.ini</language>
+            <language tag="de-DE">de-DE/com_csoverridechecker.ini</language>
+            <language tag="de-DE">de-DE/com_csoverridechecker.sys.ini</language>
+            <language tag="fr-FR">fr-FR/com_csoverridechecker.ini</language>
+            <language tag="fr-FR">fr-FR/com_csoverridechecker.sys.ini</language>
+            <language tag="es-ES">es-ES/com_csoverridechecker.ini</language>
+            <language tag="es-ES">es-ES/com_csoverridechecker.sys.ini</language>
+            <language tag="it-IT">it-IT/com_csoverridechecker.ini</language>
+            <language tag="it-IT">it-IT/com_csoverridechecker.sys.ini</language>
+            <language tag="pt-BR">pt-BR/com_csoverridechecker.ini</language>
+            <language tag="pt-BR">pt-BR/com_csoverridechecker.sys.ini</language>
+            <language tag="nl-NL">nl-NL/com_csoverridechecker.ini</language>
+            <language tag="nl-NL">nl-NL/com_csoverridechecker.sys.ini</language>
+            <language tag="ru-RU">ru-RU/com_csoverridechecker.ini</language>
+            <language tag="ru-RU">ru-RU/com_csoverridechecker.sys.ini</language>
+            <language tag="pl-PL">pl-PL/com_csoverridechecker.ini</language>
+            <language tag="pl-PL">pl-PL/com_csoverridechecker.sys.ini</language>
+            <language tag="ja-JP">ja-JP/com_csoverridechecker.ini</language>
+            <language tag="ja-JP">ja-JP/com_csoverridechecker.sys.ini</language>
+            <language tag="zh-CN">zh-CN/com_csoverridechecker.ini</language>
+            <language tag="zh-CN">zh-CN/com_csoverridechecker.sys.ini</language>
+            <language tag="tr-TR">tr-TR/com_csoverridechecker.ini</language>
+            <language tag="tr-TR">tr-TR/com_csoverridechecker.sys.ini</language>
+            <language tag="el-GR">el-GR/com_csoverridechecker.ini</language>
+            <language tag="el-GR">el-GR/com_csoverridechecker.sys.ini</language>
+            <language tag="cs-CZ">cs-CZ/com_csoverridechecker.ini</language>
+            <language tag="cs-CZ">cs-CZ/com_csoverridechecker.sys.ini</language>
+            <language tag="sv-SE">sv-SE/com_csoverridechecker.ini</language>
+            <language tag="sv-SE">sv-SE/com_csoverridechecker.sys.ini</language>
+        </languages>
+    </administration>
+
+    <api>
+        <files folder="api">
+            <folder>language</folder>
+            <folder>src</folder>
+        </files>
+        <languages folder="api/language">
+            <language tag="en-GB">en-GB/com_csoverridechecker.ini</language>
+            <language tag="de-DE">de-DE/com_csoverridechecker.ini</language>
+            <language tag="fr-FR">fr-FR/com_csoverridechecker.ini</language>
+            <language tag="es-ES">es-ES/com_csoverridechecker.ini</language>
+            <language tag="it-IT">it-IT/com_csoverridechecker.ini</language>
+            <language tag="pt-BR">pt-BR/com_csoverridechecker.ini</language>
+            <language tag="nl-NL">nl-NL/com_csoverridechecker.ini</language>
+            <language tag="ru-RU">ru-RU/com_csoverridechecker.ini</language>
+            <language tag="pl-PL">pl-PL/com_csoverridechecker.ini</language>
+            <language tag="ja-JP">ja-JP/com_csoverridechecker.ini</language>
+            <language tag="zh-CN">zh-CN/com_csoverridechecker.ini</language>
+            <language tag="tr-TR">tr-TR/com_csoverridechecker.ini</language>
+            <language tag="el-GR">el-GR/com_csoverridechecker.ini</language>
+            <language tag="cs-CZ">cs-CZ/com_csoverridechecker.ini</language>
+            <language tag="sv-SE">sv-SE/com_csoverridechecker.ini</language>
+        </languages>
+    </api>
+
+    <media destination="com_csoverridechecker" folder="media">
+        <folder>css</folder>
+        <folder>js</folder>
+    </media>
+</extension>
