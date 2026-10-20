@@ -132,3 +132,10 @@ button:focus-visible,
 pre:focus-visible,
 [tabindex]:focus-visible { outline:3px solid #155f6c; outline-offset:2px; }
 .container-header a:focus-visible { outline-color:#ffffff; }
+
+/* ---- Phone widths: the site title must wrap (added 2026-10-20) --------------
+   Cassiopeia sets .navbar-brand to white-space:nowrap at 32px, so
+   "Cybersalt Extensions Documentation" was 515px wide and every page scrolled
+   sideways on a 390px phone (WCAG 1.4.10 Reflow). Let it wrap and scale. */
+.container-header .navbar-brand { white-space:normal; min-width:0; max-width:100%; overflow-wrap:break-word;
+  font-size:clamp(1.375rem, 4.5vw + 0.5rem, 2rem); line-height:1.2; }
