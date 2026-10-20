@@ -105,3 +105,30 @@
                           overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .csdoc-lb .csdoc-lb-x { right:16px; background:#e8eef4; color:#10171e; border-radius:4px;
                         padding:5px 14px; font-weight:600; white-space:nowrap; }
+
+
+/* ---- Accessibility: WCAG 2.2 AA (added 2026-10-19) -------------------------
+   Checked with axe-core on every docs page.
+   - Site header: Cassiopeia Extended's light grey band (#c1cdcf) left the white
+     tagline at 1.62:1. A dark navy band makes the title and tagline 15:1+.
+   - Links: the template teal #1d7989 was 4.49:1 on the blue note boxes and
+     4.28:1 on code backgrounds, just under the 4.5:1 minimum. #155f6c is 6:1+
+     on white, every note tint and code backgrounds.
+   - Keyboard focus is always visible. */
+.container-header { background-color:#0b1f4b !important; background-image:none !important; }
+.container-header .navbar-brand,
+.container-header .navbar-brand a,
+.container-header .brand-logo,
+.container-header .site-description { color:#ffffff !important; }
+.container-header .navbar-brand a:hover,
+.container-header .navbar-brand a:focus { color:#ffffff !important; text-decoration:underline; }
+
+body a,
+.csdoc-doc a { color:#155f6c; }
+body a:hover,
+.csdoc-doc a:hover { color:#0e3b43; }
+a:focus-visible,
+button:focus-visible,
+pre:focus-visible,
+[tabindex]:focus-visible { outline:3px solid #155f6c; outline-offset:2px; }
+.container-header a:focus-visible { outline-color:#ffffff; }
