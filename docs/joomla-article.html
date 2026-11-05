@@ -74,8 +74,7 @@ each version, see the <a href="/extensions/override-checker/changelog">changelog
 </div>
 
 <div class="csdoc-note">
-<p><strong>Requirements.</strong> Joomla 5.0+ or Joomla 6.0+ (native to both), PHP 8.1
-or newer. Licensed GPL v2 or later. <strong>Free, with no paid tier</strong> — there
+<p><strong>Requirements.</strong> Joomla 5.0+ or Joomla 6.0+ (native to both), PHP 8.3 or newer. Licensed GPL v2 or later. <strong>Free, with no paid tier</strong> — there
 is no Pro version and nothing is held back. The interface ships in 15 languages and
 follows your admin user's language setting automatically.</p>
 </div>
@@ -376,9 +375,10 @@ likely to miss a genuine security regression or invent one that isn't there. Tre
 findings from a small local model as a first pass, not a verdict.</p>
 
 <h4>MCP clients</h4>
-<p>If your assistant speaks the Model Context Protocol, our companion extension
-<strong>MCP for Joomla</strong> exposes this site's tooling that way and removes the
-copy-paste step entirely.</p>
+<p>If your assistant speaks the Model Context Protocol, install <strong>MCP for J</strong> and its
+free <a href="https://www.cybersalt.com/extensions/mcp-for-override-checker">MCP for Override Checker</a> add-on. Your assistant then reviews and
+fixes overrides through its own tools, with no copy-paste step. It's also the better route
+for browser chats that support MCP connectors, because it avoids the browser request timeout.</p>
 
 <h3>Coming back to a review later</h3>
 
@@ -582,6 +582,27 @@ wrong file.</p>
 
 <p><strong>Restoring is a single click</strong> from the backup's detail page, and it
 rewrites the original bytes exactly. Nothing the extension does to a file is one-way.</p>
+
+<h3 id="csdoc-guard">What a fix can't add</h3>
+
+<p>Your AI reads files from your site, and a hacked file can contain text written to trick
+it. So Override Checker compares every fix with the file it replaces, and refuses one that
+adds <code>eval</code>, shell commands, decoding functions such as
+<code>base64_decode</code>, reading or writing files, outbound connections, a new or changed
+<code>include</code> or <code>require</code>, variable function calls, or superglobals such
+as <code>$_GET</code>. Code the file already has can stay, so an override that already
+contains one of these can still be fixed.</p>
+
+<p>A refused fix writes nothing. The REST API answers <code>422 CONTENTS_REFUSED</code>, and
+the Action log records <code>fix_refused</code>. If the change really is what you want, read
+it and make it in the file yourself: no AI, API call or setting can turn this off.</p>
+
+<p>Fixing an infected override stores the backdoor as that fix's backup, so restoring follows
+the same rule for AI and API callers, logged as <code>restore_refused</code>. You can still
+restore any backup yourself from the File backups screen.</p>
+
+<p>The check reads PHP only, and enough indirection can get past any list. It's a safety net,
+so keep reading what your AI proposes.</p>
 
 <div class="csdoc-tip">
 <p>Snapshots accumulate. The bundled scheduled-task plugin adds a
