@@ -82,6 +82,21 @@ final class OverridesHelper
 
         // Pre-fix backup of current contents — keeps the operation reversible.
         $currentContents   = (string) @file_get_contents($absolute);
+
+        // Here rather than in a caller, so REST, the chat and the MCP for J
+        // add-on all get it. There's deliberately no argument to skip it: an
+        // AI that was talked into a backdoor would just pass that too.
+        $added = OverrideContentGuard::introduced($currentContents, $newContents);
+        if ($added !== []) {
+            ActionLogHelper::log(
+                ActionLogHelper::ACTION_FIX_REFUSED,
+                ['override_id' => $overrideId, 'path' => $relativePath, 'added' => $added],
+                $sessionId
+            );
+
+            throw new UnsafeContentsException(OverrideContentGuard::message('COM_CSOVERRIDECHECKER_APPLY_FIX_REFUSED_UNSAFE', $added));
+        }
+
         $preFixBackupId    = BackupsHelper::createFromContents($relativePath, $currentContents, $sessionId);
 
         $written = file_put_contents($absolute, $newContents);

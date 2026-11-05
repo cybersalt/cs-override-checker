@@ -29,6 +29,8 @@ $backupsUrl         = Route::_('index.php?option=com_csoverridechecker&view=back
 $that              = $this;
 $setupGuideUrl      = Route::_('index.php?option=com_csoverridechecker&view=setupguide', false);
 $supportUrl         = Route::_('index.php?option=com_csoverridechecker&view=support', false);
+// Provider name for the Method 2 / Diagnostics strings ("using your saved %s API key").
+$provider           = $this->escape($this->aiProviderLabel);
 ?>
 
 <?php
@@ -51,6 +53,9 @@ $csocWrapSecret = function (string $prompt) use ($that): string {
 ?>
 
 <div class="container-fluid csoverridechecker-dashboard">
+
+    <?php // Already escaped: IntegrityCheck::renderAlert() builds the HTML. ?>
+    <?php echo $this->integrityAlert; ?>
 
     <!-- Navigation row — "where do I go" buttons. Alphabetical so the
          user can hunt by name; ms-auto removed because flex-wrap was
@@ -113,7 +118,7 @@ $csocWrapSecret = function (string $prompt) use ($that): string {
         </a>
         <?php if ($this->hasApiKey) : ?>
             <a href="#csti-autoscan-card" class="btn btn-primary btn-lg"
-               title="<?php echo $this->escape(Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_ACTION_AUTOSCAN_TOOLTIP_OK')); ?>">
+               title="<?php echo $this->escape(Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_ACTION_AUTOSCAN_TOOLTIP_OK', $this->aiProviderLabel)); ?>">
                 <span class="icon-rocket" aria-hidden="true"></span>
                 <?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_ACTION_AUTOSCAN'); ?>
             </a>
@@ -207,7 +212,7 @@ $csocWrapSecret = function (string $prompt) use ($that): string {
             <div class="card-body">
                 <h3 class="card-title">
                     <span class="icon-rocket" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_TITLE'); ?>
+                    <?php echo Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_TITLE', $provider); ?>
                 </h3>
                 <div class="alert alert-primary d-flex align-items-center mb-3" role="alert">
                     <span class="icon-flash me-2 fs-4" aria-hidden="true"></span>
@@ -222,15 +227,18 @@ $csocWrapSecret = function (string $prompt) use ($that): string {
                         <?php echo Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_NOTE', (int) $this->autoScanMaxOverrides, (int) $this->autoScanMaxOverrides); ?>
                     </small>
                 </p>
-                <div class="alert alert-info py-2 mb-3" role="status">
-                    <small><?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_TIER_NOTE'); ?></small>
-                </div>
+                <?php // The tier note is about Anthropic's rate limits only. ?>
+                <?php if ($this->aiProvider === 'anthropic') : ?>
+                    <div class="alert alert-info py-2 mb-3" role="status">
+                        <small><?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_TIER_NOTE'); ?></small>
+                    </div>
+                <?php endif; ?>
                 <form action="<?php echo $this->escape($runScanAction); ?>"
                       method="post"
                       data-csti-runscan
-                      data-confirm-text="<?php echo $this->escape(Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_CONFIRM')); ?>"
+                      data-confirm-text="<?php echo $this->escape(Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_CONFIRM', $this->aiProviderLabel)); ?>"
                       data-loading-title="<?php echo $this->escape(Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_LOADING_TITLE')); ?>"
-                      data-loading-body="<?php echo $this->escape(Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_LOADING_BODY')); ?>">
+                      data-loading-body="<?php echo $this->escape(Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_LOADING_BODY', $this->aiProviderLabel)); ?>">
                     <?php echo HTMLHelper::_('form.token'); ?>
                     <input type="hidden" name="task" value="display.runScan">
                     <button type="submit" class="btn btn-success btn-lg">
@@ -245,12 +253,12 @@ $csocWrapSecret = function (string $prompt) use ($that): string {
             <div class="card-body">
                 <h3 class="card-title">
                     <span class="icon-rocket" aria-hidden="true"></span>
-                    <?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_TITLE'); ?>
+                    <?php echo Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_TITLE', $provider); ?>
                 </h3>
                 <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
                     <span class="icon-warning me-2 fs-4" aria-hidden="true"></span>
                     <div>
-                        <strong><?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_NOKEY_TITLE'); ?></strong>
+                        <strong><?php echo Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_NOKEY_TITLE', $provider); ?></strong>
                         <?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_AUTOSCAN_NOKEY_BODY'); ?>
                     </div>
                 </div>
@@ -302,7 +310,7 @@ $csocWrapSecret = function (string $prompt) use ($that): string {
             </button>
         </h3>
 
-        <h4><?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_DIAGNOSTICS_API_KEY'); ?></h4>
+        <h4><?php echo Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_DIAGNOSTICS_API_KEY', $provider); ?></h4>
         <div class="csti-diag-row">
             <span class="label"><?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_DIAGNOSTICS_API_KEY_STATUS'); ?></span>
             <span class="value">
@@ -322,7 +330,7 @@ $csocWrapSecret = function (string $prompt) use ($that): string {
 
         <h4><?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_DIAGNOSTICS_TEST'); ?></h4>
         <p class="text-body-secondary mb-2">
-            <small><?php echo Text::_('COM_CSOVERRIDECHECKER_DASHBOARD_DIAGNOSTICS_TEST_INTRO'); ?></small>
+            <small><?php echo Text::sprintf('COM_CSOVERRIDECHECKER_DASHBOARD_DIAGNOSTICS_TEST_INTRO', $provider); ?></small>
         </p>
         <button type="button"
                 class="btn btn-primary"

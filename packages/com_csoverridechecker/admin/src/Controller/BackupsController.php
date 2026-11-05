@@ -53,7 +53,7 @@ final class BackupsController extends BaseController
         }
 
         try {
-            $stats = BackupsHelper::restore($id);
+            $stats = BackupsHelper::restore($id, true);
 
             $msg = Text::sprintf(
                 'COM_CSOVERRIDECHECKER_BACKUPS_RESTORE_SUCCESS',

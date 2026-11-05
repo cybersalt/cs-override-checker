@@ -160,14 +160,18 @@ final class DisplayController extends BaseController
         $back  = Route::_('index.php?option=com_csoverridechecker&view=dashboard', false);
 
         $params = ComponentHelper::getParams('com_csoverridechecker');
-        // Pass the raw stored value through to AnthropicClient — the
-        // client tracks the pre-strip length for diagnostics so we can
-        // tell "saved with embedded whitespace" apart from "saved
-        // truncated" when the key fails.
-        $apiKey = (string) $params->get('anthropic_api_key', '');
+        // Gate on the key of the provider selected in Options, not on
+        // the Anthropic key: up to 2.6.0 this read anthropic_api_key, so
+        // an OpenAI- or Gemini-only site was refused here even though the
+        // Dashboard offered Method 2.
+        $provider = AiClientFactory::currentProvider();
+        $apiKey   = AiClientFactory::apiKeyFor($provider);
 
-        if (trim($apiKey) === '') {
-            $app->enqueueMessage(Text::_('COM_CSOVERRIDECHECKER_RUN_SCAN_NO_KEY'), 'warning');
+        if ($apiKey === '') {
+            $app->enqueueMessage(
+                Text::sprintf('COM_CSOVERRIDECHECKER_RUN_SCAN_NO_KEY', AiClientFactory::labelFor($provider)),
+                'warning'
+            );
             $this->setRedirect($back);
             return;
         }
@@ -199,7 +203,13 @@ final class DisplayController extends BaseController
         // override list. Without this PHP would 504 mid-call.
         @set_time_limit(180);
 
-        $scanModel    = self::resolveModel($params->get('scan_model', 'claude-opus-4-8'));
+        // resolveModel() allow-lists Claude ids, so only Anthropic gets an
+        // explicit override. For OpenAI / Gemini pass '' and let the
+        // factory read that provider's own scan model option; passing the
+        // Claude id there would ask OpenAI or Gemini for claude-opus-4-8.
+        $scanModel = $provider === AiClientFactory::PROVIDER_ANTHROPIC
+            ? self::resolveModel($params->get('scan_model', 'claude-opus-4-8'))
+            : '';
         $maxOverrides = (int) $params->get('scan_max_overrides', ScanRunnerHelper::DEFAULT_MAX_OVERRIDES);
 
         // Log the attempt BEFORE executing so the cap counts in-flight
@@ -207,7 +217,7 @@ final class DisplayController extends BaseController
         // quick succession and both would pass the cap.
         ActionLogHelper::log(
             ActionLogHelper::ACTION_AUTO_SCAN_RUN,
-            ['model' => $scanModel, 'cap' => $maxOverrides]
+            ['provider' => $provider, 'model' => $scanModel !== '' ? $scanModel : 'provider default', 'cap' => $maxOverrides]
         );
 
         try {
@@ -272,8 +282,9 @@ final class DisplayController extends BaseController
 
         /** @var CMSApplication $app */
         $app    = $this->app;
-        $params = ComponentHelper::getParams('com_csoverridechecker');
-        $apiKey = (string) $params->get('anthropic_api_key', '');
+        // Same provider-aware key check as runScan(); this used to read
+        // anthropic_api_key even though the test itself uses the factory.
+        $apiKey = AiClientFactory::apiKeyFor();
 
         $reply = function (array $payload, int $status = 200) use ($app): void {
             $app->setHeader('status', (string) $status, true);

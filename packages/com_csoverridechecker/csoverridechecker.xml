@@ -7,7 +7,7 @@
     <license>GNU General Public License version 2 or later</license>
     <authorEmail>support@cybersalt.com</authorEmail>
     <authorUrl>https://cybersalt.com</authorUrl>
-    <version>2.6.0</version>
+    <version>2.6.1</version>
     <description>COM_CSOVERRIDECHECKER_XML_DESCRIPTION</description>
 
     <targetplatform name="joomla" version="5\.[0-9]+|6\.[0-9]+" />
@@ -39,6 +39,7 @@
         <files folder="admin">
             <filename>access.xml</filename>
             <filename>config.xml</filename>
+            <filename>integrity.json</filename>
             <folder>language</folder>
             <folder>services</folder>
             <folder>sql</folder>

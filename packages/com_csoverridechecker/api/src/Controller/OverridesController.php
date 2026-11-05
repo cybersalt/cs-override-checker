@@ -24,6 +24,7 @@ use Cybersalt\Component\Csoverridechecker\Administrator\Helper\OverridesHelper;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\PathResolver;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\PermissionHelper;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\SessionsHelper;
+use Cybersalt\Component\Csoverridechecker\Administrator\Helper\UnsafeContentsException;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filter\InputFilter;
 use Joomla\CMS\MVC\Controller\ApiController;
@@ -74,6 +75,29 @@ final class OverridesController extends ApiController
             return null;
         }
         return parent::displayItem($id);
+    }
+
+    /**
+     * createCRUDRoutes() also registers POST / PATCH / DELETE on
+     * /overrides. Rows in #__template_overrides belong to Joomla core and
+     * this API must never create or rewrite them: a crafted hash_id is
+     * a path. Refuse explicitly instead of falling through to
+     * ApiController's defaults, which only failed because no item model
+     * exists (dismiss has its own route).
+     */
+    public function add(): void
+    {
+        $this->sendJsonApiError(405, 'METHOD_NOT_ALLOWED', 'Override rows are managed by Joomla and cannot be created through this API.');
+    }
+
+    public function edit(): void
+    {
+        $this->sendJsonApiError(405, 'METHOD_NOT_ALLOWED', 'Override rows are managed by Joomla and cannot be edited through this API.');
+    }
+
+    public function delete($id = null): void
+    {
+        $this->sendJsonApiError(405, 'METHOD_NOT_ALLOWED', 'Use POST /overrides/{id}/dismiss to clear one override row.');
     }
 
     public function overrideFile(): void
@@ -141,6 +165,8 @@ final class OverridesController extends ApiController
                 ],
                 201
             );
+        } catch (UnsafeContentsException $e) {
+            $this->sendJsonApiError(422, 'CONTENTS_REFUSED', $e->getMessage());
         } catch (Throwable $e) {
             $this->sendJsonApiError(500, 'APPLY_FIX_FAILED', $e->getMessage());
         }

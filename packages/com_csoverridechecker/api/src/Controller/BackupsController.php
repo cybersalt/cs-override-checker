@@ -35,6 +35,7 @@ use Cybersalt\Component\Csoverridechecker\Administrator\Helper\BackupsHelper;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\PathResolver;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\PathSafetyHelper;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\PermissionHelper;
+use Cybersalt\Component\Csoverridechecker\Administrator\Helper\UnsafeContentsException;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Controller\ApiController;
 use Joomla\CMS\Uri\Uri;
@@ -80,6 +81,20 @@ final class BackupsController extends ApiController
         $this->createBackup();
     }
 
+    /**
+     * createCRUDRoutes() registers DELETE too. Backups are the undo
+     * history for every fix, so deleting them stays an admin-view (and
+     * scheduled purge) action; refuse here rather than fall through to
+     * ApiController::delete().
+     */
+    public function delete($id = null): void
+    {
+        $this->sendJsonApi(
+            ['errors' => [['status' => '405', 'code' => 'METHOD_NOT_ALLOWED', 'title' => 'Backups can only be deleted from the admin File backups view or by the purge task.']]],
+            405
+        );
+    }
+
     public function restore($id = null): void
     {
         if (!$this->authoriseOrFail(PermissionHelper::class . '::requireWrite')) {
@@ -119,6 +134,11 @@ final class BackupsController extends ApiController
                     ],
                 ],
                 200
+            );
+        } catch (UnsafeContentsException $e) {
+            $this->sendJsonApi(
+                ['errors' => [['status' => '422', 'code' => 'CONTENTS_REFUSED', 'title' => $e->getMessage()]]],
+                422
             );
         } catch (Throwable $e) {
             $this->sendJsonApi(

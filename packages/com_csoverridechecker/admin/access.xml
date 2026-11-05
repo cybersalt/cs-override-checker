@@ -7,8 +7,12 @@
                         (write-side endpoints + admin "Restore" / "Apply fix" actions)
 
     The standard core actions are also defined so site admins can map them
-    in the Permissions tab. Defaults are restrictive; only Super Users
-    inherit any permission until an admin grants explicitly.
+    in the Permissions tab. PermissionHelper also accepts core.manage, so
+    on a default Joomla install the Administrator group inherits both
+    tiers (core.manage is granted to Administrator at the root asset),
+    not only Super Users. Write tier writes PHP files into templates/,
+    which is code execution on the server: grant it only where you would
+    grant template editing.
 -->
 <access component="com_csoverridechecker">
     <section name="component">

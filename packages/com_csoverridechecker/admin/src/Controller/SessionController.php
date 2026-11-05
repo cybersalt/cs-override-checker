@@ -115,7 +115,9 @@ final class SessionController extends BaseController
         $params = ComponentHelper::getParams('com_csoverridechecker');
         $apiKey = (string) $params->get('anthropic_api_key', '');
         if (trim($apiKey) === '') {
-            $app->enqueueMessage(Text::_('COM_CSOVERRIDECHECKER_RUN_SCAN_NO_KEY'), 'warning');
+            // The chat runs on Anthropic only (ConversationRunner), whatever
+            // provider the scans use, so the missing key is always Anthropic's.
+            $app->enqueueMessage(Text::sprintf('COM_CSOVERRIDECHECKER_RUN_SCAN_NO_KEY', 'Anthropic'), 'warning');
             $this->setRedirect($back);
             return;
         }

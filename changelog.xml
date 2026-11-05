@@ -19,6 +19,36 @@
     <changelog>
         <element>pkg_csoverridechecker</element>
         <type>package</type>
+        <version>2.6.1</version>
+        <security>
+            <item>Pre-release security review of the whole component (deep pass; 2.4.0-2.5.0 had no recorded review).</item>
+            <item>Apply-fix now refuses new contents that add eval, shell commands, decoding functions, reading or writing files, outbound connections, a new or changed include or require, variable function calls or superglobals the file didn't already have. It covers the REST API, the session chat and the MCP for J add-on; a refusal writes nothing, returns HTTP 422 on REST and is logged. Restore through REST or MCP follows the same rule, since a fix stores the old file as a backup; a person can still restore any backup from the File backups screen.</item>
+            <item>Override file paths from #__template_overrides are now validated: a crafted row could make the view-permission file endpoints read any file on the site (including configuration.php) and point apply-fix outside templates/*/html/. Planting such a row needs database or template-manager access; the extension's API cannot create rows.</item>
+            <item>Inherited REST create/edit/delete routes on overrides, sessions and backups now return 405 instead of reaching Joomla's default handlers.</item>
+        </security>
+        <addition>
+            <item>The Setup guide recommends MCP for J and its free MCP for Override Checker add-on, for review and fixes through tools with no copy-paste step.</item>
+            <item>Installation file check on the Dashboard: each extension in the package ships a list of its files with sizes and SHA-256 hashes, and the Dashboard shows an alert if an update left any file missing, empty or changed.</item>
+        </addition>
+        <fix>
+            <item>Automated scans with OpenAI or Gemini didn't run: Run automated scan, the Diagnostics test, the Setup guide badge and the Support diagnostics all checked for an Anthropic key, and the scan sent the Claude model name to the other providers. All now follow the provider selected in Options.</item>
+            <item>Admin text no longer assumes your AI is Claude: about 30 strings now name the provider you picked or talk about your AI assistant. The follow-up chat still says Claude because it runs on Anthropic only.</item>
+            <item>The 14 translations had fallen behind the English: 20 strings rewritten in 2.6.0 were never re-translated, so other languages still showed the Claude-only Dashboard walkthrough and named Sonnet 4.6 / Opus 4.7 in the model list. All updated.</item>
+            <item>The "Fetch my Joomla API token" button in Options showed four raw language keys (COM_CSOVERRIDECHECKER_FETCH_TOKEN_WORKING, _OFFER_ENABLE, _OFFER_ENABLE_AUTH, _SAVE_REMINDER) instead of text. Reported by Scott Forsgren - thank you.</item>
+            <item>The same button's "plugin disabled" warnings showed the &lt;strong&gt; tags around the plugin name as literal text. They now render as bold.</item>
+            <item>The Setup guide and Get help entries in the admin sidebar menu showed raw language keys on every page outside the component.</item>
+            <item>The Options page heading and browser tab showed com_csoverridechecker_configuration. They now read "Override Checker: Options".</item>
+            <item>The Setup guide and Get help browser tab titles showed a literal &amp;mdash; entity.</item>
+            <item>The Anthropic API key note named Opus 4.7 as the default model; the default is Opus 4.8.</item>
+        </fix>
+        <language>
+            <item>Seven new strings, one rewritten, and the twelve file-check strings added in all 15 locales, and the two menu strings added to every locale's .sys.ini.</item>
+        </language>
+    </changelog>
+
+    <changelog>
+        <element>pkg_csoverridechecker</element>
+        <type>package</type>
         <version>2.6.0</version>
         <addition>
             <item>Choose your AI provider for the built-in automated scan: Anthropic (Claude), OpenAI (GPT) or Google (Gemini), each with its own API key field and model list.</item>

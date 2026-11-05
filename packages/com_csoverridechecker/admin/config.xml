@@ -205,6 +205,7 @@
         <field
             name="model_cost_warning"
             type="note"
+            showon="ai_provider:anthropic"
             class="alert alert-warning"
             description="COM_CSOVERRIDECHECKER_CONFIG_MODEL_COST_WARNING" />
 

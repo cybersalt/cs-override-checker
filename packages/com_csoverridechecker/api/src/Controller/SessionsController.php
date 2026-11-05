@@ -71,6 +71,19 @@ final class SessionsController extends ApiController
         $this->createSession();
     }
 
+    /**
+     * createCRUDRoutes() registers DELETE too. Sessions are deleted from
+     * the admin Sessions view only; refuse here rather than fall through
+     * to ApiController::delete().
+     */
+    public function delete($id = null): void
+    {
+        $this->sendJsonApi(
+            ['errors' => [['status' => '405', 'code' => 'METHOD_NOT_ALLOWED', 'title' => 'Sessions can only be deleted from the admin Sessions view.']]],
+            405
+        );
+    }
+
     private function createSession(): void
     {
         try {

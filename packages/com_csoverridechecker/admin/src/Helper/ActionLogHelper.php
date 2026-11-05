@@ -38,6 +38,8 @@ final class ActionLogHelper
     public const ACTION_BACKUP_RESTORED  = 'backup_restored';
     public const ACTION_BACKUP_PURGED    = 'backup_purged';
     public const ACTION_FIX_APPLIED      = 'fix_applied';
+    public const ACTION_FIX_REFUSED      = 'fix_refused';
+    public const ACTION_RESTORE_REFUSED  = 'restore_refused';
     public const ACTION_OVERRIDE_DISMISSED = 'override_dismissed';
     public const ACTION_DISCLAIMER_ACKNOWLEDGED = 'disclaimer_acknowledged';
     public const ACTION_AUTO_SCAN_RUN    = 'auto_scan_run';

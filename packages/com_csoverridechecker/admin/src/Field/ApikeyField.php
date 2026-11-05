@@ -326,7 +326,21 @@ JS;
             btn.parentNode.parentNode.appendChild(el);
         }
         el.className = 'w-100 mt-2 alert alert-' + (cls || 'info') + ' py-2 mb-0';
-        el.textContent = text;
+        // Some messages carry <strong> around a plugin name. Rebuild
+        // only that tag as a real element and keep everything else as
+        // text nodes, so an exception message in FETCH_TOKEN_ERROR can
+        // never inject markup (textContent alone showed the tags raw).
+        el.textContent = '';
+        String(text).split(/(<strong>[^<]*<\/strong>)/).forEach(function (part) {
+            var m = part.match(/^<strong>([^<]*)<\/strong>$/);
+            if (m) {
+                var s = document.createElement('strong');
+                s.textContent = m[1];
+                el.appendChild(s);
+            } else if (part !== '') {
+                el.appendChild(document.createTextNode(part));
+            }
+        });
         return el;
     }
 

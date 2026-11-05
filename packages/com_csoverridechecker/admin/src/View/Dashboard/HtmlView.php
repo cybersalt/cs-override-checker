@@ -17,6 +17,7 @@ use Cybersalt\Component\Csoverridechecker\Administrator\Helper\AnthropicClient;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\PermissionHelper;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\RescanHelper;
 use Cybersalt\Component\Csoverridechecker\Administrator\Helper\ScanRunnerHelper;
+use Cybersalt\Component\Csoverridechecker\Administrator\Integrity\IntegrityCheck;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
@@ -93,6 +94,20 @@ final class HtmlView extends BaseHtmlView
      */
     public array $rescanTemplates = [];
 
+    /**
+     * Shipped-file check (Joomla-Brain tools/integrity): an alert when an
+     * update left files missing, empty or changed, else ''. Joomla does not
+     * roll back a failed update, so a half-copied install keeps running.
+     */
+    public string $integrityAlert = '';
+
+    /** integrity.json of each extension in the package, relative to the site root. */
+    private const INTEGRITY_LISTS = [
+        'administrator/components/com_csoverridechecker/integrity.json',
+        'plugins/webservices/csoverridechecker/integrity.json',
+        'plugins/task/csoverridechecker/integrity.json',
+    ];
+
     public function display($tpl = null): void
     {
         // ACL gate. Joomla's outer core.manage check lets admins from
@@ -110,6 +125,17 @@ final class HtmlView extends BaseHtmlView
         $this->apiBase           = $this->siteUrl . '/api/index.php/v1/csoverridechecker';
         $this->overridesEndpoint = $this->apiBase . '/overrides';
         $this->componentVersion  = $this->resolveComponentVersion();
+
+        // Never let the check itself break the dashboard: if the failed
+        // update damaged IntegrityCheck.php, the page must still load.
+        try {
+            $this->integrityAlert = IntegrityCheck::renderAlert(
+                IntegrityCheck::run(self::INTEGRITY_LISTS),
+                Text::_('COM_CSOVERRIDECHECKER')
+            );
+        } catch (\Throwable $e) {
+            $this->integrityAlert = '';
+        }
 
         $params = ComponentHelper::getParams('com_csoverridechecker');
 

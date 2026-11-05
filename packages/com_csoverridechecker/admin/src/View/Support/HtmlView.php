@@ -12,6 +12,7 @@ namespace Cybersalt\Component\Csoverridechecker\Administrator\View\Support;
 
 defined('_JEXEC') or die;
 
+use Cybersalt\Component\Csoverridechecker\Administrator\Helper\AiClientFactory;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
@@ -72,7 +73,8 @@ final class HtmlView extends BaseHtmlView
         $this->phpVersion       = PHP_VERSION;
         $this->siteUrl          = rtrim(Uri::root(), '/');
 
-        $this->hasApiKey      = trim((string) $params->get('anthropic_api_key', '')) !== '';
+        $provider             = AiClientFactory::currentProvider();
+        $this->hasApiKey      = AiClientFactory::hasKey($provider);
         $this->hasJoomlaToken = trim((string) $params->get('joomla_api_token', '')) !== '';
 
         // Deliberately contains no secrets - only presence flags, never the
@@ -82,7 +84,8 @@ final class HtmlView extends BaseHtmlView
             'Joomla:         ' . $this->joomlaVersion,
             'PHP:            ' . $this->phpVersion,
             'Site URL:       ' . $this->siteUrl,
-            'Anthropic key:  ' . ($this->hasApiKey ? 'saved' : 'not saved'),
+            'AI provider:    ' . AiClientFactory::labelFor($provider),
+            'Provider key:   ' . ($this->hasApiKey ? 'saved' : 'not saved'),
             'Joomla token:   ' . ($this->hasJoomlaToken ? 'saved in Options' : 'not saved'),
         ]);
 

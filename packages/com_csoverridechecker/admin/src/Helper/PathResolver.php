@@ -31,17 +31,48 @@ defined('_JEXEC') or die;
 
 final class PathResolver
 {
+    /**
+     * Decode a hash_id and refuse anything that isn't a plain relative
+     * path under /html/. Joomla only ever writes real override paths
+     * here, so a `..` or `.` segment, a backslash or a NUL byte can only
+     * come from a hand-crafted row, and every reader and writer of the
+     * resolved path (the override-file / core-file endpoints, the scan,
+     * the chat tools, apply-fix, backups) trusts this function.
+     */
     public static function decodeHashId(string $hashId): ?string
     {
         $decoded = base64_decode($hashId, true);
-        if ($decoded === false) {
+        if ($decoded === false || !str_starts_with($decoded, '/html/')) {
             return null;
+        }
+        if (str_contains($decoded, "\0") || str_contains($decoded, '\\')) {
+            return null;
+        }
+        foreach (explode('/', substr($decoded, 1)) as $segment) {
+            if ($segment === '' || $segment === '.' || $segment === '..') {
+                return null;
+            }
         }
         return $decoded;
     }
 
+    /**
+     * Template folder names are single path segments; anything else in
+     * the row's `template` column would let the joined path climb out
+     * of templates/.
+     */
+    private static function isSafeTemplateName(string $template): bool
+    {
+        return $template !== '.' && $template !== '..'
+            && (bool) preg_match('/^[A-Za-z0-9_.-]+$/', $template);
+    }
+
     public static function overridePath(string $template, string $hashId, int $clientId): ?string
     {
+        if (!self::isSafeTemplateName($template)) {
+            return null;
+        }
+
         $relative = self::decodeHashId($hashId);
         if ($relative === null) {
             return null;

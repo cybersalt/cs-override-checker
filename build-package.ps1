@@ -46,6 +46,17 @@ if ($bomFiles.Count -gt 0) {
     throw "Strip the BOM and re-run. Set-Content -Encoding utf8 in Windows PowerShell 5.1 writes BOM by default. Use [System.IO.File]::WriteAllText with a UTF8Encoding(false), or pipe through `tail -c +4` from a unix shell to drop the leading 3 bytes."
 }
 
+# Joomla-Brain's integrity list writer (shipped-file check on the Dashboard).
+# The .joomla-brain submodule predates tools/integrity, so fall back to the
+# sibling Joomla-Brain checkout.
+$integrityTool = @(
+    (Join-Path $scriptDir '.joomla-brain\tools\integrity\New-IntegrityList.ps1'),
+    (Join-Path (Split-Path $scriptDir -Parent) 'Joomla-Brain\tools\integrity\New-IntegrityList.ps1')
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $integrityTool) {
+    throw 'Joomla-Brain tools/integrity/New-IntegrityList.ps1 not found (.joomla-brain submodule or ..\Joomla-Brain).'
+}
+
 $pkgDir         = Join-Path $scriptDir "packages\pkg_csoverridechecker"
 $pkgManifest    = Join-Path $pkgDir "pkg_csoverridechecker.xml"
 
@@ -71,12 +82,12 @@ $childExtensions = @(
     @{
         Name      = "plg_webservices_csoverridechecker"
         SourceDir = Join-Path $scriptDir "packages\plg_webservices_csoverridechecker"
-        Contents  = @("csoverridechecker.xml", "services", "src", "language")
+        Contents  = @("csoverridechecker.xml", "services", "src", "language", "integrity.json")
     },
     @{
         Name      = "plg_task_csoverridechecker"
         SourceDir = Join-Path $scriptDir "packages\plg_task_csoverridechecker"
-        Contents  = @("csoverridechecker.xml", "services", "src", "forms", "language")
+        Contents  = @("csoverridechecker.xml", "services", "src", "forms", "language", "integrity.json")
     }
 )
 
@@ -101,6 +112,10 @@ Write-Host "Building pkg_csoverridechecker v$Version ..." -ForegroundColor Cyan
 #    a stable, non-timestamped filename.
 foreach ($ext in $childExtensions) {
     Write-Host "  Child: $($ext.Name)" -ForegroundColor DarkCyan
+
+    # integrity.json: size + SHA-256 of every shipped file, so the Dashboard
+    # can spot a half-installed update (Joomla-Brain INTEGRITY-CHECK.md).
+    & $integrityTool -ExtensionDir $ext.SourceDir
 
     $childStage = Join-Path $scriptDir "build-child"
     if (Test-Path $childStage) { Remove-Item $childStage -Recurse -Force }
@@ -140,6 +155,13 @@ Copy-Item (Join-Path $pkgDir "script.php") (Join-Path $pkgStage "script.php")
 # being copied, which JED Checker flagged as "File not found" for the
 # other 14 entries.
 Copy-Item -Path (Join-Path $pkgDir "language") -Destination $pkgStage -Recurse
+# Every release zip carries both changelogs at its root (Joomla-Brain
+# VERSION-BUMP-CHECKLIST: "Ship the changelog inside the package").
+foreach ($log in @("CHANGELOG.md", "CHANGELOG.html")) {
+    $logPath = Join-Path $scriptDir $log
+    if (-not (Test-Path $logPath)) { throw "$log missing - the package must ship with both changelogs." }
+    Copy-Item $logPath (Join-Path $pkgStage $log)
+}
 
 # 3. Zip the whole package.
 Push-Location $pkgStage

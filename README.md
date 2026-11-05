@@ -28,7 +28,7 @@ This extension is template-literate. It opens your override data to an AI assist
 5. **Apply patches** in place for findings the owner confirms — auto-backed-up, fully reversible from the admin.
 6. **Mark the rest as checked** so Joomla's "Changes found" badges go away for everything that's been reviewed.
 
-**Three ways to run it.** The copy-paste workflow ships with the extension since v1.0: copy a prompt from the dashboard, paste it into whichever assistant you use, and it calls back to the site's Web Services API to read overrides and apply fixes. **v2.0 added the automated workflow**: save your Anthropic API key in Options, click *Run automated scan*, and the extension drives the whole review server-side — no copy-paste, no second window. Once the report is produced, a chat box on the session detail view lets you ask for actions (Anthropic only) (*"fix #1 and #3, dismiss the cosmetic ones"*) and Claude applies them via tool calls without you leaving the Joomla admin.
+**Three ways to run it.** The copy-paste workflow ships with the extension since v1.0: copy a prompt from the dashboard, paste it into whichever assistant you use, and it calls back to the site's Web Services API to read overrides and apply fixes. **v2.0 added the automated workflow**: pick an AI provider in Options (Anthropic, OpenAI or Google Gemini) and save its API key, click *Run automated scan*, and the extension drives the whole review server-side — no copy-paste, no second window. Once the report is produced, a chat box on the session detail view lets you ask for actions (*"fix #1 and #3, dismiss the cosmetic ones"*) and Claude applies them via tool calls without you leaving the Joomla admin. That chat is the one Anthropic-only part.
 
 For per-version details, see the full [CHANGELOG.md](CHANGELOG.md). The most recent release is always at the [Releases page](https://github.com/cybersalt/cs-override-checker/releases/latest).
 
@@ -38,8 +38,9 @@ For per-version details, see the full [CHANGELOG.md](CHANGELOG.md). The most rec
 
 | Extension | Role |
 |---|---|
-| `com_csoverridechecker` | Admin component — dashboard, sessions log, action log, file backups (with restore), Diagnostics modal, Run automated scan, follow-up chat on the session detail view, Options dialog (Anthropic API key + model selection + Joomla API token), Web Services API endpoints |
+| `com_csoverridechecker` | Admin component — dashboard, sessions log, action log, file backups (with restore), Diagnostics modal, Run automated scan, follow-up chat on the session detail view, Options dialog (AI provider + API key + model selection + Joomla API token), Web Services API endpoints |
 | `plg_webservices_csoverridechecker` | Registers the `/api/index.php/v1/csoverridechecker/...` routes for the component. Auto-enabled by the package installer. |
+| `plg_task_csoverridechecker` | Scheduled task (*System → Manage → Scheduled Tasks*) that purges old file backups. |
 
 Shipped together as `pkg_csoverridechecker`.
 
@@ -49,7 +50,7 @@ Shipped together as `pkg_csoverridechecker`.
 
 **Copy-paste (no API key required, no extra cost beyond the AI subscription you already have):** Dashboard → Copy scan prompt → paste into any assistant that can make an HTTPS request → it calls back to the Joomla Web Services API using your Joomla API token → produces a report → asks what to fix → applies fixes back through the API.
 
-**Automated (requires an API key from Anthropic, OpenAI or Google — pay-per-token):** Options → pick your AI provider and save that provider's API key → Dashboard → Run automated scan. Server walks the override tracker, calls Anthropic, saves the report as a session. From the session view, chat box lets you ask Claude to apply fixes / dismiss findings (this chat is Anthropic-only; scans work on all three providers) — Claude calls server-side tool functions, you watch each turn render as a chat bubble. Auto-backups still apply; everything is reversible from File backups.
+**Automated (requires an API key from Anthropic, OpenAI or Google — pay-per-token):** Options → pick your AI provider and save that provider's API key → Dashboard → Run automated scan. Server walks the override tracker, calls the provider you picked, saves the report as a session. From the session view, chat box lets you ask Claude to apply fixes / dismiss findings (this chat is Anthropic-only; scans work on all three providers) — Claude calls server-side tool functions, you watch each turn render as a chat bubble. Auto-backups still apply; everything is reversible from File backups.
 
 ### API endpoints
 
@@ -62,11 +63,11 @@ Auth on every request: `X-Joomla-Token: <token>` + `Accept: application/vnd.api+
 - `GET /v1/csoverridechecker/sessions/{id}` — fetch a previous review report
 
 **Write:**
-- `POST /v1/csoverridechecker/overrides/{id}/apply-fix` — patch the override file in place; auto-snapshots first
+- `POST /v1/csoverridechecker/overrides/{id}/apply-fix` — patch the override file in place; auto-snapshots first. Refuses contents that add `eval`, shell commands, file writes, `include`/`require`, superglobals and the like the file didn't already have (HTTP 422 `CONTENTS_REFUSED`)
 - `POST /v1/csoverridechecker/overrides/{id}/dismiss` — clear one tracker row
 - `POST /v1/csoverridechecker/overrides/dismiss-all` — clear every remaining row
 - `POST /v1/csoverridechecker/sessions` — save a review report
-- `POST /v1/csoverridechecker/backups/{id}/restore` — roll back any patch
+- `POST /v1/csoverridechecker/backups/{id}/restore` — roll back any patch. Refused (422 `CONTENTS_REFUSED`) if it would add code apply-fix refuses; a person can still restore it from the File backups screen
 
 ### Security
 

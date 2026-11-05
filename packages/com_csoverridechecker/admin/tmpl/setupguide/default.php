@@ -179,7 +179,7 @@ $families = [
             <p class="card-text mb-0">
                 <span class="badge bg-<?php echo $this->hasApiKey ? 'success' : 'secondary'; ?>">
                     <?php echo $this->hasApiKey
-                        ? Text::_('COM_CSOVERRIDECHECKER_SETUPGUIDE_ANTHROPIC_ACTIVE')
+                        ? Text::sprintf('COM_CSOVERRIDECHECKER_SETUPGUIDE_ANTHROPIC_ACTIVE', $this->escape($this->aiProviderLabel))
                         : Text::_('COM_CSOVERRIDECHECKER_SETUPGUIDE_ANTHROPIC_INACTIVE'); ?>
                 </span>
             </p>

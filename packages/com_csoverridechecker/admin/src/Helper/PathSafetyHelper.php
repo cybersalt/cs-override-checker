@@ -102,11 +102,21 @@ final class PathSafetyHelper
      */
     public static function assertOverrideWriteAllowed(string $absolute): void
     {
-        $normalized = str_replace('\\', '/', $absolute);
+        // Match against the RESOLVED path. Up to 2.6.0 this compared the
+        // raw string, so templates/<tpl>/html/../../../components/x.php
+        // matched the templates/<tpl>/html/ pattern below while actually
+        // pointing into components/ (assertWithinRoot() passed too, as
+        // that path never leaves the site root).
+        $basename   = basename($absolute);
+        $parentReal = realpath(\dirname($absolute));
         $rootReal   = realpath(JPATH_ROOT);
         if ($rootReal === false) {
             throw new \RuntimeException('Refusing to write: site root could not be resolved.');
         }
+        if ($parentReal === false || $basename === '' || $basename === '.' || $basename === '..') {
+            throw new \RuntimeException('Refusing to write: target path could not be resolved.');
+        }
+        $normalized = str_replace('\\', '/', $parentReal) . '/' . $basename;
         $rootSep = rtrim(str_replace('\\', '/', $rootReal), '/') . '/';
 
         if (!str_starts_with($normalized, $rootSep)) {

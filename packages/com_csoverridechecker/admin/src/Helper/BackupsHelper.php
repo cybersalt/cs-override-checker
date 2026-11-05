@@ -360,9 +360,14 @@ final class BackupsHelper
      * refuses to write a PHP-executable file outside of a template
      * override path.
      *
+     * Fixing an infected override stores the backdoor as its pre-fix backup,
+     * so an AI talked into it could put the backdoor back with a restore.
+     * Only a person clicking Restore in the admin ($byPerson) may bring back
+     * code OverrideContentGuard wouldn't let a fix add.
+     *
      * @return array{backup_id: int, restored_path: string, pre_restore_backup_id: ?int, bytes_written: int}
      */
-    public static function restore(int $id): array
+    public static function restore(int $id, bool $byPerson = false): array
     {
         $row = self::find($id);
         if ($row === null) {
@@ -400,6 +405,23 @@ final class BackupsHelper
         // (LONGTEXT) accepts up to ~4 GB. A row could in principle
         // contain more bytes than MAX_WRITE_SIZE; refuse before write.
         PathSafetyHelper::assertSizeAllowed($restoredContents);
+
+        if (!$byPerson) {
+            $added = OverrideContentGuard::introduced(
+                is_file($absolute) ? (string) @file_get_contents($absolute) : '',
+                $restoredContents
+            );
+
+            if ($added !== []) {
+                ActionLogHelper::log(
+                    ActionLogHelper::ACTION_RESTORE_REFUSED,
+                    ['backup_id' => $id, 'path' => $relativePath, 'added' => $added],
+                    isset($row->session_id) ? (int) $row->session_id : null
+                );
+
+                throw new UnsafeContentsException(OverrideContentGuard::message('COM_CSOVERRIDECHECKER_RESTORE_REFUSED_UNSAFE', $added));
+            }
+        }
 
         // Pre-restore safety backup of the current file state, so this
         // restore is itself reversible.

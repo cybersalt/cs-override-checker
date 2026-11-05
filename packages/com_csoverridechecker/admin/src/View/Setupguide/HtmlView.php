@@ -12,6 +12,7 @@ namespace Cybersalt\Component\Csoverridechecker\Administrator\View\Setupguide;
 
 defined('_JEXEC') or die;
 
+use Cybersalt\Component\Csoverridechecker\Administrator\Helper\AiClientFactory;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
@@ -37,8 +38,11 @@ final class HtmlView extends BaseHtmlView
     /** Whether a Joomla API token is saved in Options. */
     public bool $hasJoomlaToken = false;
 
-    /** Whether an Anthropic key is saved (i.e. Method 2 is available). */
+    /** Whether the selected AI provider has a key saved (i.e. Method 2 is available). */
     public bool $hasApiKey = false;
+
+    /** Display name of the AI provider selected in Options. */
+    public string $aiProviderLabel = '';
 
     /** Link back to the dashboard where the prompt lives. */
     public string $dashboardUrl = '';
@@ -62,7 +66,8 @@ final class HtmlView extends BaseHtmlView
             . '/api/index.php/v1/csoverridechecker';
 
         $this->hasJoomlaToken = trim((string) $params->get('joomla_api_token', '')) !== '';
-        $this->hasApiKey      = trim((string) $params->get('anthropic_api_key', '')) !== '';
+        $this->hasApiKey       = AiClientFactory::hasKey();
+        $this->aiProviderLabel = AiClientFactory::labelFor();
 
         $this->dashboardUrl = Route::_('index.php?option=com_csoverridechecker&view=dashboard', false);
 
